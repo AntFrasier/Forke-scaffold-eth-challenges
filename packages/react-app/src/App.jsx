@@ -1,6 +1,6 @@
 import Portis from "@portis/web3";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import { Alert, Button, Col, Menu, Row } from "antd";
+import { Alert, Button, Col, Menu, Row, Drawer } from "antd";
 import "antd/dist/antd.css";
 import Authereum from "authereum";
 import {
@@ -19,7 +19,7 @@ import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import WalletLink from "walletlink";
 import Web3Modal from "web3modal";
 import "./App.css";
-import { Account, Contract, Faucet, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
+import { Account, Contract, Faucet, GasGauge, Header, Ramp, ThemeSwitch, Address, Multisig, ManageSigners } from "./components";
 import { INFURA_ID, NETWORK, NETWORKS, ALCHEMY_KEY } from "./constants";
 import externalContracts from "./contracts/external_contracts";
 // contracts
@@ -27,8 +27,10 @@ import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor } from "./helpers";
 // import Hints from "./Hints";
 import { ExampleUI, Hints, Subgraph } from "./views";
+import { useThemeSwitcher } from "react-css-theme-switcher";
 
-const { ethers } = require("ethers");
+const { ethers } = require("ethers"); //
+
 /*
     Welcome to 🏗 scaffold-eth !
 
@@ -67,8 +69,8 @@ const scaffoldEthProvider = navigator.onLine
   : null;
 const poktMainnetProvider = navigator.onLine
   ? new ethers.providers.StaticJsonRpcProvider(
-      "https://eth-mainnet.gateway.pokt.network/v1/lb/61853c567335c80036054a2b",
-    )
+    "https://eth-mainnet.gateway.pokt.network/v1/lb/61853c567335c80036054a2b",
+  )
   : null;
 const mainnetInfura = navigator.onLine
   ? new ethers.providers.StaticJsonRpcProvider(`https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_KEY}`)
@@ -96,6 +98,7 @@ const walletLinkProvider = walletLink.makeWeb3Provider(`https://eth-mainnet.alch
 /*
   Web3 modal helps us "connect" external wallets:
 */
+
 const web3Modal = new Web3Modal({
   network: "mainnet", // Optional. If using WalletConnect on xDai, change network to "xdai" and add RPC info below for xDai chain.
   cacheProvider: true, // optional
@@ -162,12 +165,13 @@ const web3Modal = new Web3Modal({
 });
 
 function App(props) {
+
   const mainnetProvider =
     poktMainnetProvider && poktMainnetProvider._isProvider
       ? poktMainnetProvider
       : scaffoldEthProvider && scaffoldEthProvider._network
-      ? scaffoldEthProvider
-      : mainnetInfura;
+        ? scaffoldEthProvider
+        : mainnetInfura;
 
   const [injectedProvider, setInjectedProvider] = useState();
   const [address, setAddress] = useState();
@@ -181,7 +185,8 @@ function App(props) {
       window.location.reload();
     }, 1);
   };
-
+  // base URL for The backend:
+  const apiBaseUrl= "http://localhost:33550/api/"
   /* 💵 This hook will get the price of ETH from 🦄 Uniswap: */
   const price = useExchangeEthPrice(targetNetwork, mainnetProvider);
 
@@ -438,6 +443,27 @@ function App(props) {
     );
   }
 
+  //adding slide out debug states 
+  const [debugContractToShow, setDebugContractToShow] = useState('');
+
+  const contractsToShow = Object.keys(readContracts).map((_contractName) => {
+    if (!debugContractToShow) setDebugContractToShow(_contractName) //if there as been no click show the last contract that've been deployed
+    return (
+      <Menu.Item key={`${_contractName}`}>
+        <Link onClick={() => { setDebugContractToShow(_contractName) }}>{_contractName}</Link>
+      </Menu.Item>
+    );
+  });
+  const [visible, setVisible] = useState(false);
+  const showDrawer = () => {
+    setVisible(true);
+  };
+
+  const onClose = () => {
+    setVisible(false);
+  };
+  //end of slide out states
+
   return (
     <div className="App">
       {/* ✏️ Edit the header and change the title to your project name */}
@@ -452,37 +478,28 @@ function App(props) {
               }}
               to="/"
             >
-              YourContract
+              MultiSig
             </Link>
           </Menu.Item>
-          <Menu.Item key="/hints">
+          <Menu.Item key="/manageSigners">
             <Link
               onClick={() => {
-                setRoute("/hints");
+                setRoute("/manageSigners");
               }}
-              to="/hints"
+              to="/manageSigners"
             >
-              Hints
+              Manage signers
             </Link>
           </Menu.Item>
-          <Menu.Item key="/exampleui">
+
+          <Menu.Item key="/transactions">
             <Link
               onClick={() => {
-                setRoute("/exampleui");
+                setRoute("/transactions");
               }}
-              to="/exampleui"
+              to="/transactions"
             >
-              ExampleUI
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="/mainnetdai">
-            <Link
-              onClick={() => {
-                setRoute("/mainnetdai");
-              }}
-              to="/mainnetdai"
-            >
-              Mainnet DAI
+              Transactions
             </Link>
           </Menu.Item>
           <Menu.Item key="/subgraph">
@@ -499,65 +516,44 @@ function App(props) {
 
         <Switch>
           <Route exact path="/">
-            {/*
-                🎛 this scaffolding is full of commonly used components
-                this <Contract/> component will automatically parse your ABI
-                and give you a form to interact with it locally
-            */}
-
-            <Contract
-              name="YourContract"
-              price={price}
-              signer={userSigner}
-              provider={localProvider}
-              address={address}
-              blockExplorer={blockExplorer}
-              contractConfig={contractConfig}
-            />
-          </Route>
-          <Route path="/hints">
-            <Hints
-              address={address}
-              yourLocalBalance={yourLocalBalance}
-              mainnetProvider={mainnetProvider}
-              price={price}
-            />
-          </Route>
-          <Route path="/exampleui">
-            <ExampleUI
-              address={address}
-              userSigner={userSigner}
-              mainnetProvider={mainnetProvider}
-              localProvider={localProvider}
-              yourLocalBalance={yourLocalBalance}
-              price={price}
-              tx={tx}
-              writeContracts={writeContracts}
+            <Multisig 
               readContracts={readContracts}
-              purpose={purpose}
+              provider = {localProvider}
+              contractConfig = {contractConfig}
+              signer = {userSigner}
+              apiBaseUrl={apiBaseUrl}
+              writeContracts={writeContracts}
             />
+            <Button style={{ position: "fixed", left: "26px", top: 130 }} type="primary" onClick={showDrawer}>
+              Debug Contracts
+            </Button>
+            <Drawer
+              contentWrapperStyle={{ width: "40vw" }}
+              title="Debug"
+              placement="left"
+              closable={true}
+              onClose={onClose}
+              visible={visible}
+              key="right">
+                <Address value={address} />
+                <Menu selectedKeys={debugContractToShow} mode="horizontal">
+                  {contractsToShow}
+                </Menu>
+                <Contract
+                  name={debugContractToShow}
+                  price={price}
+                  signer={userSigner}
+                  provider={localProvider}
+                  address={address}
+                  blockExplorer={blockExplorer}
+                  contractConfig={contractConfig}
+                />
+            </Drawer>
           </Route>
-          <Route path="/mainnetdai">
-            <Contract
-              name="DAI"
-              customContract={mainnetContracts && mainnetContracts.contracts && mainnetContracts.contracts.DAI}
-              signer={userSigner}
-              provider={mainnetProvider}
-              address={address}
-              blockExplorer="https://etherscan.io/"
-              contractConfig={contractConfig}
-              chainId={1}
+          <Route path="/manageSigners">
+            <ManageSigners 
+              apiBaseUrl={apiBaseUrl}
             />
-            {/*
-            <Contract
-              name="UNI"
-              customContract={mainnetContracts && mainnetContracts.contracts && mainnetContracts.contracts.UNI}
-              signer={userSigner}
-              provider={mainnetProvider}
-              address={address}
-              blockExplorer="https://etherscan.io/"
-            />
-            */}
           </Route>
           <Route path="/subgraph">
             <Subgraph
