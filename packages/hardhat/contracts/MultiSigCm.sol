@@ -18,7 +18,6 @@ contract MultiSigCm is Ownable {
         OFFICER,
         USER
     }
-    uint256 txId;
     address public sender;
     struct Params {
         bytes callData;
@@ -35,6 +34,7 @@ contract MultiSigCm is Ownable {
     event NewSignerEvent(address signer, Role role);
     event RemovedSignerEvent(address signer);
     event SigneRequiredEvent(uint8 signerRequired);
+    event TxSent(address to, uint256 value, bytes callData);
 
     modifier onlySelf() {
         require(msg.sender == self, "not self");
@@ -85,7 +85,7 @@ contract MultiSigCm is Ownable {
         uint8 _signRequired,
         uint256 _txId,
         bytes[] memory signatures
-    ) external {
+    ) external returns (bytes memory results){
         require(signatures.length >= signRequired, "not enough signaures !");
         require(txSent[_txId] == false, "transaction allready sent ! ");
         Params memory data;
@@ -95,7 +95,6 @@ contract MultiSigCm is Ownable {
         data.signRequired = _signRequired;
         data.txId = _txId;
         bytes32 msgHash = keccak256(abi.encode(data));
-        // console.log(isValidSignature(msgHash, signatures[0]));
         uint8 validSignature = 0;
         for (uint8 i = 0; i < signatures.length; i++) {
             if (isValidSignature(msgHash, signatures[i])) {
@@ -108,23 +107,19 @@ contract MultiSigCm is Ownable {
         require(validSignature >= signRequired, "not enough valide signatures !");
         txSent[_txId] = true; //to avoid to sent the same tx multiple times
         (bool s, bytes memory result) = _to.call{value :_amount}(_callData);
-        console.log("youhou here we are");
+        require (s, "call tx Failed");
+        emit TxSent(_to, _amount, _callData);
+        return result;
     }
 
-    function addSigner(address _newSigner) public {
-        //todo set public to internal and only self after tests
-        // todo the public should be changed by internal after test and add onlyself
-        //todo be sure the signer is not allready here
-        // self = owner();
+    function addSigner(address _newSigner) internal onlySelf {
+        require(menbersRoles[_newSigner] == Role.NULL, "Signer allReady In");
         menbers.push(_newSigner);
         menbersRoles[_newSigner] = Role.ADMIN;
         emit NewSignerEvent(_newSigner, menbersRoles[_newSigner]);
     }
 
-    function removeSigner(address _Signer) public {
-        //todo set public to internal and only self after tests
-        // todo the public should be changed by internal after test
-
+    function removeSigner(address _Signer) internal onlySelf {
         bool done = false;
         uint8 index;
         for (uint8 i = 0; i < menbers.length; i++) {
@@ -142,16 +137,12 @@ contract MultiSigCm is Ownable {
         menbers.pop(); //remove the last entry of the array
         if (signRequired > menbers.length && signRequired > 1) {
             signRequired--;
-        } //should maybe use a require statement to be sure that there will never be more signature needed that menbers ...
+        } //should maybe use a require statement to be sure that there will never be more signature needed that menbers ??...
         emit RemovedSignerEvent(_Signer);
     }
 
-    function setSignersRequired(uint8 _signRequired) public onlySelf {
-        // todo the public should be changed by private after test
-        require(
-            _signRequired <= menbers.length,
-            "Can't have more signers than menbers"
-        );
+    function setSignersRequired(uint8 _signRequired) internal onlySelf {
+        require(_signRequired <= menbers.length, "Can't have more signers than menbers");
         signRequired = _signRequired;
         emit SigneRequiredEvent(signRequired);
     }
@@ -163,26 +154,6 @@ contract MultiSigCm is Ownable {
     function getMenberRole(address menber) public view returns (Role) {
         return menbersRoles[menber];
     }
-
-    function getTxId() public view returns (uint256) {
-        //inutile
-        return txId;
-    }
-
-    //for testing only
-    function test(bytes calldata data) public returns (bytes memory) {
-        (bool sucess, bytes memory result) = address(this).call{value: 0}(data);
-        require(sucess, "tx failed");
-        return result;
-    }
-
-    function test2(string memory test) public returns (address) {
-        sender = tx.origin;
-        console.log(test);
-        return sender;
-    }
-
-    receive() external payable {}
 
     fallback() external payable {}
 }
