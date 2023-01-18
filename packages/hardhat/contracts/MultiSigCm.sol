@@ -47,7 +47,7 @@ contract MultiSigCm is Ownable {
     }
 
     function isValidSignature(bytes32 _hash, bytes memory signature)
-        internal
+        internal view
         returns (bool)
     {
         address signer = _hash.toEthSignedMessageHash().recover(signature);
@@ -55,7 +55,6 @@ contract MultiSigCm is Ownable {
         for (uint8 i = 0; i < menbers.length; i++) {
             if (menbers[i] == signer) {
                 return true;
-                break; //dont need that break if i return before ?? if solidity work as js
             }
         }
         return false;
@@ -154,6 +153,7 @@ contract MultiSigCm is Ownable {
     function getMenberRole(address menber) public view returns (Role) {
         return menbersRoles[menber];
     }
+    receive()external payable {}
 
     fallback() external payable {}
 }
