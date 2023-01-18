@@ -20,4 +20,8 @@ export { default as Wallet } from "./Wallet";
 export { default as L2Bridge } from "./L2Bridge";
 export { default as Multisig } from "./Multisig";
 export { default as ManageSigners } from "./ManageSigners";
+export { default as Transactions } from "./Transactions";
+export { default as AddSigner } from "./AddSigner";
+export { default as AddSignatures } from "./AddSignatures";
+export { default as SendEth } from "./SendEth";
 

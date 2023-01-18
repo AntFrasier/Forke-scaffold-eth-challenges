@@ -15,7 +15,12 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
     // args: [ "Hello", ethers.utils.parseEther("1.5") ],
     log: true,
   });
-
+  await deploy("TestToken", {
+    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
+    from: deployer,
+    // args: [ "Hello", ethers.utils.parseEther("1.5") ],
+    log: true,
+  });
   // Getting a previously deployed contract
   const MultiSigCm = await ethers.getContract("MultiSigCm", deployer);
   await MultiSigCm.transferOwnership("0x67dFe20b5F8Bc81C64Ef121bF8e4228FB4CBC60B");

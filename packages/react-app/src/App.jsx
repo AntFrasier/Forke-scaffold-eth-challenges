@@ -19,7 +19,7 @@ import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import WalletLink from "walletlink";
 import Web3Modal from "web3modal";
 import "./App.css";
-import { Account, Contract, Faucet, GasGauge, Header, Ramp, ThemeSwitch, Address, Multisig, ManageSigners } from "./components";
+import { Account, Contract, Faucet, GasGauge, Header, Ramp, ThemeSwitch, Address, Multisig, ManageSigners, Transactions } from "./components";
 import { INFURA_ID, NETWORK, NETWORKS, ALCHEMY_KEY } from "./constants";
 import externalContracts from "./contracts/external_contracts";
 // contracts
@@ -206,6 +206,7 @@ function App(props) {
     getAddress();
   }, [userSigner]);
 
+
   // You can warn the user if you would like them to be on a specific network
   const localChainId = localProvider && localProvider._network && localProvider._network.chainId;
   const selectedChainId =
@@ -234,6 +235,11 @@ function App(props) {
 
   // If you want to make 🔐 write transactions to your contracts, use the userSigner:
   const writeContracts = useContractLoader(userSigner, contractConfig, localChainId);
+
+  
+  //get menbers of the multisig
+  const menbers = useContractReader(readContracts, "MultiSigCm", "getSigners");
+  const neededSigns = useContractReader(readContracts, "MultiSigCm", "signRequired");
 
   // EXTERNAL CONTRACT EXAMPLE:
   //
@@ -523,6 +529,11 @@ function App(props) {
               signer = {userSigner}
               apiBaseUrl={apiBaseUrl}
               writeContracts={writeContracts}
+              price={price}
+              menbers={menbers}
+              mainnetProvider = {mainnetProvider}
+              neededSigns = {neededSigns}
+              // chainId={chainId}
             />
             <Button style={{ position: "fixed", left: "26px", top: 130 }} type="primary" onClick={showDrawer}>
               Debug Contracts
@@ -553,6 +564,24 @@ function App(props) {
           <Route path="/manageSigners">
             <ManageSigners 
               apiBaseUrl={apiBaseUrl}
+              readContracts={readContracts}
+              provider = {localProvider}
+              contractConfig = {contractConfig}
+              signer = {userSigner}
+              writeContracts={writeContracts}
+            />
+          </Route>
+          <Route path="/transactions">
+            <Transactions 
+              apiBaseUrl={apiBaseUrl}
+              readContracts={readContracts}
+              provider = {localProvider}
+              contractConfig = {contractConfig}
+              signer = {userSigner}
+              writeContracts={writeContracts}
+              menbers={menbers}
+              neededSigns = {neededSigns}
+              txHelper = {tx}
             />
           </Route>
           <Route path="/subgraph">

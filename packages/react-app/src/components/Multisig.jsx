@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Col, Divider, Row, Tooltip } from "antd";
+import { Button, Card, Col, Divider, Input, Row, Tooltip } from "antd";
 import { useBalance, useContractLoader, useContractReader } from "eth-hooks";
 import Address from "./Address";
 import { useEffect } from "react";
@@ -7,55 +7,43 @@ import { useState } from "react";
 import Balance from "./Balance";
 import { ethers } from "ethers";
 import axios from "axios";
+import { AbiCoder } from "ethers/lib/utils";
+import AddSigner from "./AddSigner";
+import proposeTx from "../helpers/propseTx";
+import AddSignatures from "./AddSignatures"
+import SendEth from "./SendEth";
+import AddCustomCall from "./AddCustomCall";
 
-const Multisig = ({ readContracts, provider, contractConfig, chainId, signer, apiBaseUrl, writeContracts }) => {
+const Multisig = ({ readContracts, provider, contractConfig, chainId, signer, apiBaseUrl, writeContracts, price, menbers, mainnetProvider, neededSigns }) => {
+  // const encoder = ethers.utils.defaultAbiCoder;
   const contracts = useContractLoader(provider, contractConfig, chainId);
   const MultiSigCm = contracts ? contracts["MultiSigCm"] : "";
-  const address = MultiSigCm ? MultiSigCm.address : "";
-  const menbers = useContractReader(readContracts, "MultiSigCm", "getSigners");
-  const neededSign = useContractReader(readContracts, "MultiSigCm", "signRequired");
-  const executeTx = useContractLoader(writeContracts, "MultiSigCm", "execute") 
-  // const encoder = new ethers.utils.AbiCoder;
-  // const encodedTest = encoder.encode(["string", "uint8", "bytes[]"], ["test", 2, [0,0,32]]);
-  const [hashed, setHashed] = useState();
-  const [signedMess, setSignedMess] = useState([]);
-  const [solidityStruc, setSolidityStruct] = useState([]);
+  const multiSigAdd = MultiSigCm ? MultiSigCm.address : "";
+  const enumRole = ["null", "admin", "user", "dude"];
 
-  async function savToDatabase ( data ) {
-    try {
-    let result = await axios.post( apiBaseUrl + "signedMessage", { data }); //should do a try catch here
-    console.log (result.data)
-  } catch (err) {
-    console.log(err);
-  }
-  }
-
-  async function sign(mess) {
-    // let hash = await useContractReader(readContracts, "MultiSigCm", "getHash");
-    let hash = await MultiSigCm.getHash(mess[0], mess[1], mess[2], mess[3], mess[4]);
-    console.log('has : ', hash[1])
-    const signature = await signer.signMessage(ethers.utils.arrayify(hash[0]));
-    setSignedMess([...signedMess, signature]);
-    console.log(signedMess);
-    setHashed(hash[0]);
-    setSolidityStruct([mess[0], mess[1], mess[2], mess[3], mess[4]]);
-  }
-
-  async function execute() {
-    const sigArray = [signedMess[0]]
-    let executeTx = await writeContracts["MultiSigCm"].execute("2", "0x67dFe20b5F8Bc81C64Ef121bF8e4228FB4CBC60B", "10000000000000000", "0x67dFe20b5F8Bc81C64Ef121bF8e4228FB4CBC60B", "2", sigArray, {});
-    console.log(executeTx)
-    // let tx = await executeTx.execute(solidityStruc,signedMess);
-    // console.log(tx)
+  async function getRole (add) {
+    let role =  0;//await MultiSigCm.getMenberRole(add); todo add roles
+    console.log ("role ds function", role)
+    return role;
   }
 
   const displayMenbers = menbers
-    ? menbers.map((menber, index) => {
+    ? menbers.map( (menber, index) => {
+       let role = getRole(menber); //wird error with roles ... todo add a correct role management
         return (
           <Row key={index} style={{ display: "flex", justifyContent: "center" }}>
             <Col>
               {" "}
-              <Address address={menber} />{" "}
+              <Address address={menber} /> {" "} 
+            </Col>
+            <Col>
+              {" "}
+              <Button   
+                disabled = {menbers.length > 1 ? false : true} 
+                onClick = { () => {
+                  proposeTx(apiBaseUrl, "removeSigner(address)", [["address"] , [menber]], multiSigAdd, 0, neededSigns)
+                }}
+              >remove</Button>
             </Col>
           </Row>
         );
@@ -68,7 +56,7 @@ const Multisig = ({ readContracts, provider, contractConfig, chainId, signer, ap
         <Row title="Header" style={{ display: "flex", justifyContent: "space-between" }}>
           <h2 style={{ margin: "0px" }}> MultiSig </h2>{" "}
           <span>
-            <Address address={address} /> <Balance address={address} />
+            <Address address={multiSigAdd} /> <Balance address={multiSigAdd} provider={provider} dollarMultiplier={price}/>
           </span>
         </Row>
         <Divider />
@@ -77,41 +65,50 @@ const Multisig = ({ readContracts, provider, contractConfig, chainId, signer, ap
         </Row>
         {displayMenbers}
         <Row style={{ flexDirection: "row-reverse" }}>
-          <b>&nbsp;{neededSign}</b> Signature(s) required :{" "}
+          <b>&nbsp;{neededSigns}</b> Signature(s) required :{" "}
         </Row>
         <Divider />
-        <Row title="transaction list" style={{ display: "flex", justifyContent: "center" }}>
-          <Col title="Menbers">Transaction waiting</Col>
+        <Row title="Add a menber" style={{ display: "flex", justifyContent: "center" }}>
+        <AddSigner 
+          menbers = {menbers} 
+          multiSigAdd = {multiSigAdd}
+          mainnetProvider={mainnetProvider}
+          apiBaseUrl = {apiBaseUrl}
+          neededSigns = {neededSigns}
+          />
         </Row>
-        {hashed}
-        {/* balance : {balance} */}
-        <button
-          onClick={() => {
-            sign( ["2",
-                   "0x67dFe20b5F8Bc81C64Ef121bF8e4228FB4CBC60B",
-                   "10000000000000000",
-                   "0x67dFe20b5F8Bc81C64Ef121bF8e4228FB4CBC60B",
-                   "2"]);
-          }}
-        >
-          sign
-        </button>
-        <ul>{signedMess.map( (mess, index) => <li key={index}>{mess}</li>)}</ul>
-        <button
-          onClick={() => {
-            savToDatabase(signedMess);
-          }}
-        >
-          save to Datbase
-        </button>
-        <button
-          onClick={() => {
-            execute();
-          }}
-        >
-          sendTx
-        </button>
-       
+        <Divider />
+        <Row title="Add Sigantures" style={{ display: "flex", justifyContent: "center" }}>
+        <AddSignatures
+          menbers = {menbers} 
+          multiSigAdd = {multiSigAdd}
+          mainnetProvider={mainnetProvider}
+          apiBaseUrl = {apiBaseUrl}
+          neededSigns = {neededSigns}
+          />
+        </Row>
+        <Divider />
+        <Row title="Send Eth" style={{ display: "flex", justifyContent: "center" }}>
+        <SendEth
+          menbers = {menbers} 
+          multiSigAdd = {multiSigAdd}
+          mainnetProvider={mainnetProvider}
+          apiBaseUrl = {apiBaseUrl}
+          neededSigns = {neededSigns}
+          price={price}
+          />
+           </Row>
+          <Divider />
+          <Row title="Send Eth" style={{ display: "flex", justifyContent: "center" }}>
+          <AddCustomCall
+          menbers = {menbers} 
+          multiSigAdd = {multiSigAdd}
+          mainnetProvider={mainnetProvider}
+          apiBaseUrl = {apiBaseUrl}
+          neededSigns = {neededSigns}
+          price={price}
+          />
+         </Row>
       </Card>
     </div>
   );
@@ -119,4 +116,3 @@ const Multisig = ({ readContracts, provider, contractConfig, chainId, signer, ap
 
 export default Multisig;
 
-//rafce

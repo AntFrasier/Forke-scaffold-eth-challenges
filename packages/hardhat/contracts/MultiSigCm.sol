@@ -6,143 +6,125 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-/*  
-**Off-chain: ⛓🙅🏻‍♂️**
-
- - Generation of a packed hash (bytes32) for a function call with specific parameters through a public view function.
- - It is signed by one of the signers associated to the multisig, and added to an array of signatures (`bytes[] memory signatures`)
-
-**On-Chain: ⛓🙆🏻‍♂️**
-
- - `bytes[] memory signatures` is then passed into `executeTransaction` as well as the necessary info to use `recover()` 
-to obtain the public address that ought to line up with one of the signers of the wallet.
-   - This method, plus some conditional logic to avoid any duplicate entries from a single signer, is how votes for a specific 
-transaction (hashed tx) are assessed.
- - If it's a success, the tx is passed to the `call(){}` function of the deployed MetaMultiSigWallet contract (this contract),
-thereby passing the `onlySelf` modifier for any possible calls to internal txs such as 
-(`addSigner()`,`removeSigner()`,`transferFunds()`,`updateSignaturesRequried()`). */
-
 contract MultiSigCm is Ownable {
     using ECDSA for bytes32;
 
     address public self;
     uint8 public signRequired = 1;
     address[] menbers;
-    enum Role { 
+    enum Role {
         NULL,
         ADMIN,
         OFFICER,
         USER
     }
-
-    //todo Add roles to menbers
-    enum FunctionCalled {
-        ADDSIGNER,
-        REMOVESIGNER,
-        SETREQUIREDSIGNATURES,
-        SENDETH
-    }
-
+    uint256 txId;
+    address public sender;
     struct Params {
-        uint8 functionCalled;
+        bytes callData;
         address to;
         uint256 amount;
-        address signer;
         uint8 signRequired;
+        uint256 txId;
     }
-    uint256 ID = 0 ;
 
     mapping(address => Role) menbersRoles;
-    mapping(uint256 => Params) transactionID;
-    //mapping(uint => address) menbers;  //this an array of menbers maybe an address[] menbers ...
-    //todo add roles like GM, officer, user and pondarate the signatures needed with it like : sign needed 2 officer ans 4 users or 1 gm + 1 officer
-    address public sender;
+    //should have a mapping with txId and bool to say this tx as allredy be done to avoid double send the tx
+    mapping(uint256 => bool) txSent; //when a txId is receive this mapping is set to true
 
-    event NewSignerEvent(address signer);
+    event NewSignerEvent(address signer, Role role);
     event RemovedSignerEvent(address signer);
     event SigneRequiredEvent(uint8 signerRequired);
 
     modifier onlySelf() {
-        require(msg.sender == self, "not self"); //todo change this to the good logic ....
+        require(msg.sender == self, "not self");
         _;
     }
 
     constructor() {
         self = address(this);
+        menbers.push(0x67dFe20b5F8Bc81C64Ef121bF8e4228FB4CBC60B);
     }
 
     function isValidSignature(bytes32 _hash, bytes memory signature)
         internal
         returns (bool)
     {
-        // todo check if the signer is menber
-        address signer = _hash.toEthSignedMessageHash().recover(
-            signature
-        );
+        address signer = _hash.toEthSignedMessageHash().recover(signature);
         // sender = signer;
-        for (uint8 i = 0; i < menbers.length ; i++) {
-            if (menbers[i] == signer) return true;
+        for (uint8 i = 0; i < menbers.length; i++) {
+            if (menbers[i] == signer) {
+                return true;
+                break; //dont need that break if i return before ?? if solidity work as js
+            }
         }
         return false;
     }
 
-   function getHash(uint8 _functionCalled, address _to, uint256 _amount, address _signer,  uint8 _signRequired) public pure returns (bytes32 _hash, Params memory data) {
-    // function getHash(uint8 _functionCalled, uint8 _signRequired) public pure returns (bytes32 _hash) {
+    function getHash(
+        bytes memory _callData,
+        address _to,
+        uint256 _amount,
+        uint8 _signRequired,
+        uint256 _txId
+    ) public pure returns (bytes32 _hash) {
+        // function getHash(uint8 _functionCalled, uint8 _signRequired) public pure returns (bytes32 _hash) {
         Params memory data;
-        data.functionCalled = _functionCalled;
+        data.callData = _callData;
         data.to = _to;
         data.amount = _amount;
-        data.signer = _signer;
         data.signRequired = _signRequired;
-        // ID += 1;
-        // transactionID[ID] = data;
-        return (keccak256(abi.encode(data)), data);
+        data.txId = _txId;
+        return (keccak256(abi.encode(data)));
     }
 
-    function execute(uint8 _functionCalled, address _to, uint256 _amount, address _signer,  uint8 _signRequired, bytes[] memory signatures) external {
+    function execute(
+        bytes calldata _callData,
+        address _to,
+        uint256 _amount,
+        uint8 _signRequired,
+        uint256 _txId,
+        bytes[] memory signatures
+    ) external {
         require(signatures.length >= signRequired, "not enough signaures !");
-        console.log(signatures.length);
-        Params memory mess;
-        mess.functionCalled = _functionCalled;
-        mess.to = _to;
-        mess.amount = _amount;
-        mess.signer = _signer;
-        mess.signRequired = _signRequired;
-        bytes32 msgHash = keccak256(abi.encode(mess));
-        console.log(isValidSignature(msgHash, signatures[0]));
+        require(txSent[_txId] == false, "transaction allready sent ! ");
+        Params memory data;
+        data.callData = _callData;
+        data.to = _to;
+        data.amount = _amount;
+        data.signRequired = _signRequired;
+        data.txId = _txId;
+        bytes32 msgHash = keccak256(abi.encode(data));
+        // console.log(isValidSignature(msgHash, signatures[0]));
         uint8 validSignature = 0;
-        for (uint8 i = 0 ; i < signatures.length  ; i++) {
-         if (isValidSignature(msgHash, signatures[i])) {
-            validSignature++;
-            if (validSignature == signRequired) { break; } //gas saving 
-         }
+        for (uint8 i = 0; i < signatures.length; i++) {
+            if (isValidSignature(msgHash, signatures[i])) {
+                validSignature++;
+                if (validSignature == signRequired) {
+                    break;
+                } //gas saving
+            }
         }
-        require (validSignature >= signRequired, "not enough valide signatures !");
-        if (mess.functionCalled == 0) {
-            addSigner(_signer);
-        } else if (mess.functionCalled == 1) {
-            removeSigner(_signer);
-        } else if (mess.functionCalled == 2) {
-            setSignersRequired(_signRequired);
-        } else if (mess.functionCalled == 3) {
-             ( bool sucess, ) = _to.call{value: _amount}("");
-            require (sucess, "transfert failed");
-        } 
-        console.log("youhou", mess.functionCalled);
+        require(validSignature >= signRequired, "not enough valide signatures !");
+        txSent[_txId] = true; //to avoid to sent the same tx multiple times
+        (bool s, bytes memory result) = _to.call{value :_amount}(_callData);
+        console.log("youhou here we are");
     }
 
-    function addSigner(address _newSigner) public { //todo set public to internal and only self after tests
-        // todo the public should be changed by private after test
+    function addSigner(address _newSigner) public {
+        //todo set public to internal and only self after tests
+        // todo the public should be changed by internal after test and add onlyself
         //todo be sure the signer is not allready here
         // self = owner();
         menbers.push(_newSigner);
         menbersRoles[_newSigner] = Role.ADMIN;
-        emit NewSignerEvent(_newSigner);
+        emit NewSignerEvent(_newSigner, menbersRoles[_newSigner]);
     }
 
-    function removeSigner(address _Signer) public { //todo set public to internal and only self after tests
-        // todo the public should be changed by private after test
-        
+    function removeSigner(address _Signer) public {
+        //todo set public to internal and only self after tests
+        // todo the public should be changed by internal after test
+
         bool done = false;
         uint8 index;
         for (uint8 i = 0; i < menbers.length; i++) {
@@ -152,7 +134,7 @@ contract MultiSigCm is Ownable {
             }
         }
         require(done, "Signer not fund");
-        require(menbers.length > 1, "Last signer can't be removed !" );
+        require(menbers.length > 1, "Last signer can't be removed !");
         for (uint256 i = index; i < menbers.length - 1; i++) {
             // shifting the element in the array from index to the last
             menbers[i] = menbers[i + 1];
@@ -176,6 +158,28 @@ contract MultiSigCm is Ownable {
 
     function getSigners() public view returns (address[] memory) {
         return menbers;
+    }
+
+    function getMenberRole(address menber) public view returns (Role) {
+        return menbersRoles[menber];
+    }
+
+    function getTxId() public view returns (uint256) {
+        //inutile
+        return txId;
+    }
+
+    //for testing only
+    function test(bytes calldata data) public returns (bytes memory) {
+        (bool sucess, bytes memory result) = address(this).call{value: 0}(data);
+        require(sucess, "tx failed");
+        return result;
+    }
+
+    function test2(string memory test) public returns (address) {
+        sender = tx.origin;
+        console.log(test);
+        return sender;
     }
 
     receive() external payable {}
