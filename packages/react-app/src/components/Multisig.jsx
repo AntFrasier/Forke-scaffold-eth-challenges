@@ -13,16 +13,18 @@ import proposeTx from "../helpers/propseTx";
 import AddSignatures from "./AddSignatures"
 import SendEth from "./SendEth";
 import AddCustomCall from "./AddCustomCall";
+import { useHistory } from "react-router-dom";
 
 const Multisig = ({ readContracts, provider, contractConfig, chainId, signer, apiBaseUrl, writeContracts, price, menbers, mainnetProvider, neededSigns }) => {
-  // const encoder = ethers.utils.defaultAbiCoder;
+
   const contracts = useContractLoader(provider, contractConfig, chainId);
   const MultiSigCm = contracts ? contracts["MultiSigCm"] : "";
   const multiSigAdd = MultiSigCm ? MultiSigCm.address : "";
-  const enumRole = ["null", "admin", "user", "dude"];
+  const history = useHistory();
+ // const enumRole = ["null", "admin", "user", "dude"]; //todo add roles to the multisig
 
   async function getRole (add) {
-    let role =  0;//await MultiSigCm.getMenberRole(add); todo add roles
+    let role =  0;//await MultiSigCm.getMenberRole(add); // todo add roles working...
     console.log ("role ds function", role)
     return role;
   }
@@ -42,6 +44,7 @@ const Multisig = ({ readContracts, provider, contractConfig, chainId, signer, ap
                 disabled = {menbers.length > 1 ? false : true} 
                 onClick = { () => {
                   proposeTx(apiBaseUrl, "removeSigner(address)", [["address"] , [menber]], multiSigAdd, 0, neededSigns)
+                  history.pushState("/transactions");
                 }}
               >remove</Button>
             </Col>

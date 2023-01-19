@@ -7,8 +7,9 @@ import axios from 'axios';
 import { useContractLoader, useContractReader } from 'eth-hooks';
 import { ethers } from 'ethers';
 import Address from './Address';
+import Events from './Events';
 
-function Transactions({ apiBaseUrl, provider, contractConfig, chainId, neededSigns, signer, menbers, txHelper}) {
+function Transactions({ apiBaseUrl, provider, mainnetProvider,contractConfig, chainId, neededSigns, signer, menbers, txHelper, readContracts}) {
 
     
     const contracts = useContractLoader(signer, contractConfig, chainId);
@@ -130,7 +131,14 @@ function Transactions({ apiBaseUrl, provider, contractConfig, chainId, neededSig
 
             <List title="Transactions done">
                 Tx Done : <br />
-                TODO : add event listener to get txDone
+                <Events
+                    contracts={readContracts}
+                    contractName="MultiSigCm"
+                    eventName="TxSent"
+                    localProvider={provider}
+                    mainnetProvider={mainnetProvider}
+                    startBlock={1}
+                />
             </List>
         </div>
     )

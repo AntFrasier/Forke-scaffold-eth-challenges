@@ -1,14 +1,21 @@
-import { Button, InputNumber, Form } from 'antd'
-import React from 'react'
-import { useState } from 'react'
-import proposeTx from '../helpers/propseTx'
+import { Button, InputNumber, Form } from 'antd';
+import React from 'react';
+import { useState } from 'react';
+import proposeTx from '../helpers/propseTx';
+import { useHistory } from 'react-router-dom';
 
 const AddSignatures = ({neededSigns, menbers, apiBaseUrl,multiSigAdd}) => {
     const [signsNeeded, setSignsNeeded] = useState(neededSigns);
     const [loading, setLoading] = useState(false);
+    const history = useHistory();
 
     async function handleClick(){
-        await proposeTx(apiBaseUrl,"setSignersRequired(uint8)",[["uint8"],[signsNeeded]], multiSigAdd, 0, neededSigns)
+        try {
+            await proposeTx(apiBaseUrl,"setSignersRequired(uint8)",[["uint8"],[signsNeeded]], multiSigAdd, 0, neededSigns);
+            history.push("/transactions");
+        } catch (err) {
+            console.log("error while propose tx to add sigantures required : " , err);
+        }
     }
 
     console.log(menbers?.length)

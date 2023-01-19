@@ -7,6 +7,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { useEffect } from 'react';
 import proposeTx from '../helpers/propseTx';
 import { ethers } from 'ethers';
+import { useHistory } from 'react-router-dom';
 
 const AddCustomCall = ({apiBaseUrl, neededSigns,mainnetProvider, price}) => {
     const [to, setTo] = useState("");
@@ -18,11 +19,18 @@ const AddCustomCall = ({apiBaseUrl, neededSigns,mainnetProvider, price}) => {
     const [args, setArgs] = useState();
     const [params, setParams] = useState([[], []]);
     const count = 0;
+    const history = useHistory();
 
     async function handlePropose() {
-        // apiBaseUrl, _functionName, _params, _to, _value, neededSigns
-        console.log(apiBaseUrl, functionName, params, to, amount, neededSigns);
-        proposeTx(apiBaseUrl, functionName, params, to, amount, neededSigns);
+        try {
+            await proposeTx(apiBaseUrl, functionName, params, to, amount, neededSigns);
+            history.push("/transactions")
+        } catch (err) {
+            console.log("error while sneding propseTx in customCall : ", err)
+            alert(err)
+        }
+
+        
 
     }
     function getArg ( string, index) {
@@ -119,7 +127,7 @@ const AddCustomCall = ({apiBaseUrl, neededSigns,mainnetProvider, price}) => {
             toDisplay = (
                     <AddressInput 
                         placeholder='Address'
-                        style={{width:"100%"}}
+                        ensProvider={mainnetProvider}
                         value={params[1][index]}
                         onChange={ (value) => {
                             let oldParam = params;

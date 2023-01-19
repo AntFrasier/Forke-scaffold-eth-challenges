@@ -487,17 +487,6 @@ function App(props) {
               MultiSig
             </Link>
           </Menu.Item>
-          <Menu.Item key="/manageSigners">
-            <Link
-              onClick={() => {
-                setRoute("/manageSigners");
-              }}
-              to="/manageSigners"
-            >
-              Manage signers
-            </Link>
-          </Menu.Item>
-
           <Menu.Item key="/transactions">
             <Link
               onClick={() => {
@@ -506,16 +495,6 @@ function App(props) {
               to="/transactions"
             >
               Transactions
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="/subgraph">
-            <Link
-              onClick={() => {
-                setRoute("/subgraph");
-              }}
-              to="/subgraph"
-            >
-              Subgraph
             </Link>
           </Menu.Item>
         </Menu>
@@ -561,21 +540,12 @@ function App(props) {
                 />
             </Drawer>
           </Route>
-          <Route path="/manageSigners">
-            <ManageSigners 
-              apiBaseUrl={apiBaseUrl}
-              readContracts={readContracts}
-              provider = {localProvider}
-              contractConfig = {contractConfig}
-              signer = {userSigner}
-              writeContracts={writeContracts}
-            />
-          </Route>
           <Route path="/transactions">
             <Transactions 
               apiBaseUrl={apiBaseUrl}
               readContracts={readContracts}
               provider = {localProvider}
+              mainnetProvider={mainnetProvider}
               contractConfig = {contractConfig}
               signer = {userSigner}
               writeContracts={writeContracts}

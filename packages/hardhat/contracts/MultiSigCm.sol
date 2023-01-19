@@ -18,7 +18,6 @@ contract MultiSigCm is Ownable {
         OFFICER,
         USER
     }
-    address public sender;
     struct Params {
         bytes callData;
         address to;
@@ -111,14 +110,13 @@ contract MultiSigCm is Ownable {
         return result;
     }
 
-    function addSigner(address _newSigner) internal onlySelf {
-        require(menbersRoles[_newSigner] == Role.NULL, "Signer allReady In");
+    function addSigner(address _newSigner) public onlySelf {
         menbers.push(_newSigner);
         menbersRoles[_newSigner] = Role.ADMIN;
         emit NewSignerEvent(_newSigner, menbersRoles[_newSigner]);
     }
 
-    function removeSigner(address _Signer) internal onlySelf {
+    function removeSigner(address _Signer) public onlySelf {
         bool done = false;
         uint8 index;
         for (uint8 i = 0; i < menbers.length; i++) {
@@ -140,7 +138,7 @@ contract MultiSigCm is Ownable {
         emit RemovedSignerEvent(_Signer);
     }
 
-    function setSignersRequired(uint8 _signRequired) internal onlySelf {
+    function setSignersRequired(uint8 _signRequired) public onlySelf {
         require(_signRequired <= menbers.length, "Can't have more signers than menbers");
         signRequired = _signRequired;
         emit SigneRequiredEvent(signRequired);

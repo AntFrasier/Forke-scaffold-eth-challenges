@@ -4,11 +4,13 @@ import { ethers } from 'ethers';
 import Blockies from "react-blockies";
 import proposeTx from '../helpers/propseTx';
 import AddressInput from './AddressInput';
+import { useHistory } from 'react-router-dom';
 
 const AddSigner = ({menbers, multiSigAdd, mainnetProvider, apiBaseUrl, neededSigns}) => {
     const [newSigner, setNewSigner] = useState("");
     const [loading, setLoading] = useState(false);
     const [active, setActive] = useState(false);
+    const history = useHistory();
 
     function checkMenberPresence (address) {
         return menbers.find( (menber) => {
@@ -20,12 +22,14 @@ const AddSigner = ({menbers, multiSigAdd, mainnetProvider, apiBaseUrl, neededSig
 
     async function handlePropose() {
         try {
-        setLoading(true)
+        setLoading(true);
         await proposeTx(apiBaseUrl, "addSigner(address)", [["address"] , [newSigner]], multiSigAdd, 0, neededSigns);
-        setNewSigner("")
+        setNewSigner("");
         setActive(false);
         setLoading(false);
+        history.push("/transactions");
         } catch (err) {
+            alert(err)
             console.log(err);
             setActive(false);
             setLoading(false);
