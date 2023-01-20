@@ -8,6 +8,7 @@ import { useContractLoader, useContractReader } from 'eth-hooks';
 import { ethers } from 'ethers';
 import Address from './Address';
 import Events from './Events';
+import { DeleteOutlined } from '@ant-design/icons';
 
 function Transactions({ apiBaseUrl, provider, mainnetProvider,contractConfig, chainId, neededSigns, signer, menbers, txHelper, readContracts}) {
 
@@ -104,7 +105,13 @@ function Transactions({ apiBaseUrl, provider, mainnetProvider,contractConfig, ch
                          <Address address={tx.to} /> 
                          <div style={{display:"flex", flexDirection:"column", fontSize:"0.75rem"}}>
                             <div>{(tx.functionName === "") ? "Transfert" : tx.functionName.substring(0,tx.functionName.indexOf("("))}</div>
-                            <div>{(tx.params[1] == "") ? "Ξ" + ethers.utils.formatEther(tx.value) : tx.params[1]}</div>
+                            <div>{(tx.params[1] == "") ? (
+                                "Ξ" + ethers.utils.formatEther(tx.value).substring(0,12) 
+                                ) : ( 
+                                (tx.params[1].length < 12) ? (""+tx.params[1]).substring(0,12) + "..." :  tx.params[1]
+                                )
+                            }
+                            </div>
                         </div> 
                         {tx.signatures?.length} 
                         / 
@@ -125,6 +132,17 @@ function Transactions({ apiBaseUrl, provider, mainnetProvider,contractConfig, ch
                             send
                             </Button>
                         </div>
+                        <Button 
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={ async () => {
+                                setLoading(true);
+                                await axios.get(apiBaseUrl+`deleteTx/${tx.txId}`);
+                                getPendingTransactions();
+                                setLoading(false);
+                                }}>
+                        </Button>
+
                     <Divider/>
                     </Row> ) : null}                  
             </Card>

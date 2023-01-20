@@ -81,65 +81,128 @@ const AddCustomCall = ({apiBaseUrl, neededSigns,mainnetProvider, price}) => {
                 toDisplay = (
                     <Row key={index}> 
                         <Input 
+                            autoFocus
                             placeholder='uint256' 
                             value={params[1][index]}
-                            onChange={ (e) => {
-                                let oldParam = params;
+                            onChange={ async (e) => {
+                                let oldParam = [...params];
                                 oldParam[1][index] = e.target.value;
                                 setParams(oldParam);
                                 }
                             }
-                            suffix={<Tooltip placement="right" title="* 10 ** 18">
-                            <div
-                              type="dashed"
-                              style={{ cursor: "pointer" }}
-                              onClick={async () => {
-                                let newValue = params;
-                                const floatValue = parseFloat(params[1][index]);
-                                if (floatValue) {
-                                newValue[1][index] = ("" + floatValue * 10 ** 18);
-                                setParams(newValue);}
+                            suffix={
+                                <Tooltip placement="right" title="* 10 ** 18">
+                                    <div
+                                        type="dashed"
+                                        style={{ cursor: "pointer" }}
+                                        onClick={ async () => {
+                                            let newValue = [...params];
+                                            const floatValue = (params[1][index]);
+                                            console.log("float value : " , floatValue)
+                                            if (floatValue) {
+                                            newValue[1][index] = ("" + floatValue * 10 ** 18);
+                                            console.log("after *18 : ",newValue[1][index] )
+                                            setParams(newValue);}
 
-                              }}
-                            >
-                              ✴️
-                            </div>
+                                        }}
+                                    >
+                                    ✴️
+                                    </div>
                           </Tooltip>}                
                         />
                     </Row>
                     );
                 break;
-            case "string" :
-            toDisplay = (
-                <Row key={index}> 
-                    <Input 
-                        placeholder='string' 
-                        onChange={  (e) => {
-                            let oldParam = params;
-                            oldParam[1][index] = e.target.value;
-                            setParams(oldParam);
-                            }}
-                    />
-                </Row>
-                );
+            case "string" || "uint64" || "uint" || "uint8" || "uint32" || "int" || "int8" || "int32" || "int64" || "int256":
+                toDisplay = (
+                    <Row key={index}> 
+                        <Input 
+                            placeholder='string' 
+                            onChange={  (e) => {
+                                let oldParam = params;
+                                oldParam[1][index] = e.target.value;
+                                setParams(oldParam);
+                                }}
+                        />
+                    </Row>
+                    );
             break;
             case "address" :
-            toDisplay = (
+                toDisplay = (
                     <AddressInput 
                         placeholder='Address'
-                        ensProvider={mainnetProvider}
-                        value={params[1][index]}
-                        onChange={ (value) => {
-                            let oldParam = params;
-                            console.log(value)
-                            oldParam[1][index] = value;
-                            setParams(oldParam);
+                            ensProvider={mainnetProvider}
+                            value={params[1][index]}
+                            onChange={ (value) => {
+                                let oldParam = params;
+                                console.log(value)
+                                oldParam[1][index] = value;
+                                setParams(oldParam);
                             }}
                     />
+                    );
+            break;
+            case "bool" :
+                toDisplay = (
+                    <Row key={index}> 
+                        <Input 
+                            placeholder='Bollean' 
+                            onChange={  (e) => {
+                                let oldParam = params;
+                                if (e.target.value === "true" || e.target.value === "1" || e.target.value === "0x1" || e.target.value === "0x01" || e.target.value === "0x0001") {
+                                    oldParam[1][index] = 1;
+                                } else oldParam[1][index] = 0;
+                                setParams(oldParam);
+                                }}
+                        />
+                    </Row>
                 );
             break;
+            case "bytes32" :
+                toDisplay = (
+                    <Row key={index}> 
+                        <Input 
+                            placeholder='Bytes32' 
+                            onChange={  (e) => {
+                                let oldParam = params;
+                                if (ethers.utils.isHexString(e.target.value)) {
+                                    
+                                    oldParam[1][index] = ethers.utils.parseBytes32String(e.target.value);
+                                    setParams(oldParam);
+                                } else {
+                                    
+                                    oldParam[1][index] = ethers.utils.formatBytes32String(e.target.value);
+                                    setParams(oldParam);
+                                }
+                            }}
+                        />
+                    </Row>
+                    );
+                break;
+                case "bytes" :
+                toDisplay = (
+                    <Row key={index}> 
+                        <Input 
+                            placeholder='Bytes' 
+                            onChange={  (e) => {
+                                let oldParam = params;
+                                if (ethers.utils.isHexString(e.target.value)) {
+                                    
+                                    oldParam[1][index] = ethers.utils.toUtf8String(e.target.value);
+                                    setParams(oldParam);
+                                } else {
+                                    
+                                    oldParam[1][index] = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(e.target.value));
+                                    setParams(oldParam);
+                                }
+                            }}
+                        />
+                    </Row>
+                    );
+                break;
             default : 
                 toDisplay = ("waiting for argume,ts to display");
+                
         }
         return toDisplay;
     }

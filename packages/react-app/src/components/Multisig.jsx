@@ -1,13 +1,8 @@
 import React from "react";
-import { Button, Card, Col, Divider, Input, Row, Tooltip } from "antd";
-import { useBalance, useContractLoader, useContractReader } from "eth-hooks";
+import { Button, Card, Col, Divider, Row } from "antd";
+import { useContractLoader } from "eth-hooks";
 import Address from "./Address";
-import { useEffect } from "react";
-import { useState } from "react";
 import Balance from "./Balance";
-import { ethers } from "ethers";
-import axios from "axios";
-import { AbiCoder } from "ethers/lib/utils";
 import AddSigner from "./AddSigner";
 import proposeTx from "../helpers/propseTx";
 import AddSignatures from "./AddSignatures"
@@ -15,7 +10,7 @@ import SendEth from "./SendEth";
 import AddCustomCall from "./AddCustomCall";
 import { useHistory } from "react-router-dom";
 
-const Multisig = ({ readContracts, provider, contractConfig, chainId, signer, apiBaseUrl, writeContracts, price, menbers, mainnetProvider, neededSigns }) => {
+const Multisig = ({ provider, contractConfig, chainId, apiBaseUrl, price, menbers, mainnetProvider, neededSigns }) => {
 
   const contracts = useContractLoader(provider, contractConfig, chainId);
   const MultiSigCm = contracts ? contracts["MultiSigCm"] : "";
