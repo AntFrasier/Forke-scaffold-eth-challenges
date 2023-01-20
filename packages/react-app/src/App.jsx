@@ -476,7 +476,7 @@ function App(props) {
       <Header />
       {networkDisplay}
       <BrowserRouter>
-        <Menu style={{ textAlign: "center" }} selectedKeys={[route]} mode="horizontal">
+        <Menu style={{ textAlign: "center" }} selectedKeys={[location.pathname]} mode="horizontal">
           <Menu.Item key="/">
             <Link
               onClick={() => {

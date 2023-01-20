@@ -1,1 +1,1 @@
-{"txs" : [{"functionName":"","params":[[],[]],"to":"1","value":{"type":"BigNumber","hex":"0xdfe8406fb7b8e4"},"txId":4,"callData":"0xc5d24601","neededSigns":1,"signatures":[]}] }
+{"txs":[{"functionName":"setSignersRequired(uint8)","params":[["uint8"],[2]],"to":"0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9","value":0,"txId":9,"callData":"0x2640ba440000000000000000000000000000000000000000000000000000000000000002","neededSigns":1,"signatures":[]}]}
