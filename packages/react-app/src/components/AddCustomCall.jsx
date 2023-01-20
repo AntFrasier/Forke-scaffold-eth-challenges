@@ -168,7 +168,7 @@ const AddCustomCall = ({apiBaseUrl, neededSigns,mainnetProvider, price}) => {
             placeholder='Function Name ex : mint(uint256)'
             value ={functionName}
             onChange={ (e) => {
-                handleFunctionName(e.target.value.toLocaleLowerCase());
+                handleFunctionName(e.target.value);
                 
               }}
         />
