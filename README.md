@@ -1,9 +1,9 @@
 # 🏗 scaffold-eth | 🏰 BuidlGuidl
 
-#TODO : fix bug with addressInput customcall data
-fix menu nav active when push history
-fix lowercase problem custom calldata
-add the possibility to remove a proposed tx in  the database using offline signature (let say only admin can do that);
+#TODO : 
+fix bug with addressInput customcall data
+
+
 
 ## 🚩 Challenge-multi-sig 👛
 
