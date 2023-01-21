@@ -119,7 +119,7 @@ const AddCustomCall = ({apiBaseUrl, neededSigns,mainnetProvider, price}) => {
                         <Input 
                             placeholder='string' 
                             onChange={  (e) => {
-                                let oldParam = params;
+                                let oldParam = [...params];
                                 oldParam[1][index] = e.target.value;
                                 setParams(oldParam);
                                 }}
@@ -130,12 +130,12 @@ const AddCustomCall = ({apiBaseUrl, neededSigns,mainnetProvider, price}) => {
             case "address" :
                 toDisplay = (
                     <AddressInput 
+                        key={index}
                         placeholder='Address'
                             ensProvider={mainnetProvider}
                             value={params[1][index]}
                             onChange={ (value) => {
-                                let oldParam = params;
-                                console.log(value)
+                                let oldParam = [...params];
                                 oldParam[1][index] = value;
                                 setParams(oldParam);
                             }}
@@ -148,7 +148,7 @@ const AddCustomCall = ({apiBaseUrl, neededSigns,mainnetProvider, price}) => {
                         <Input 
                             placeholder='Bollean' 
                             onChange={  (e) => {
-                                let oldParam = params;
+                                let oldParam = [...params];
                                 if (e.target.value === "true" || e.target.value === "1" || e.target.value === "0x1" || e.target.value === "0x01" || e.target.value === "0x0001") {
                                     oldParam[1][index] = 1;
                                 } else oldParam[1][index] = 0;
@@ -164,7 +164,7 @@ const AddCustomCall = ({apiBaseUrl, neededSigns,mainnetProvider, price}) => {
                         <Input 
                             placeholder='Bytes32' 
                             onChange={  (e) => {
-                                let oldParam = params;
+                                let oldParam = [...params];
                                 if (ethers.utils.isHexString(e.target.value)) {
                                     
                                     oldParam[1][index] = ethers.utils.parseBytes32String(e.target.value);
@@ -185,7 +185,7 @@ const AddCustomCall = ({apiBaseUrl, neededSigns,mainnetProvider, price}) => {
                         <Input 
                             placeholder='Bytes' 
                             onChange={  (e) => {
-                                let oldParam = params;
+                                let oldParam = [...params];
                                 if (ethers.utils.isHexString(e.target.value)) {
                                     
                                     oldParam[1][index] = ethers.utils.toUtf8String(e.target.value);
@@ -206,10 +206,7 @@ const AddCustomCall = ({apiBaseUrl, neededSigns,mainnetProvider, price}) => {
         }
         return toDisplay;
     }
-     useEffect ( () => {
-        console.log("params : ",params)
-     }, [params])
-//mint(uint256)
+
   return (
     <div>Cusctom Call
         <AddressInput
