@@ -11,7 +11,7 @@ contract MultiSigCm is Ownable {
 
     address public self;
     uint8 public signRequired = 1;
-    address[] menbers;
+    address[] members;
     enum Role {
         NULL,
         ADMIN,
@@ -26,7 +26,7 @@ contract MultiSigCm is Ownable {
         uint256 txId;
     }
 
-    mapping(address => Role) menbersRoles;
+    mapping(address => Role) membersRoles;
     //should have a mapping with txId and bool to say this tx as allredy be done to avoid double send the tx
     mapping(uint256 => bool) txSent; //when a txId is receive this mapping is set to true
 
@@ -42,7 +42,8 @@ contract MultiSigCm is Ownable {
 
     constructor() {
         self = address(this);
-        menbers.push(0x67dFe20b5F8Bc81C64Ef121bF8e4228FB4CBC60B);
+        members.push(0x67dFe20b5F8Bc81C64Ef121bF8e4228FB4CBC60B);
+        membersRoles[0x67dFe20b5F8Bc81C64Ef121bF8e4228FB4CBC60B] = Role.ADMIN;
     }
 
     function isValidSignature(bytes32 _hash, bytes memory signature)
@@ -51,8 +52,8 @@ contract MultiSigCm is Ownable {
     {
         address signer = _hash.toEthSignedMessageHash().recover(signature);
         // sender = signer;
-        for (uint8 i = 0; i < menbers.length; i++) {
-            if (menbers[i] == signer) {
+        for (uint8 i = 0; i < members.length; i++) {
+            if (members[i] == signer) {
                 return true;
             }
         }
@@ -111,45 +112,45 @@ contract MultiSigCm is Ownable {
     }
 
     function addSigner(address _newSigner) public onlySelf {
-        menbers.push(_newSigner);
-        menbersRoles[_newSigner] = Role.ADMIN;
-        emit NewSignerEvent(_newSigner, menbersRoles[_newSigner]);
+        members.push(_newSigner);
+        membersRoles[_newSigner] = Role.ADMIN;
+        emit NewSignerEvent(_newSigner, membersRoles[_newSigner]);
     }
 
     function removeSigner(address _Signer) public onlySelf {
         bool done = false;
         uint8 index;
-        for (uint8 i = 0; i < menbers.length; i++) {
-            if (menbers[i] == _Signer) {
+        for (uint8 i = 0; i < members.length; i++) {
+            if (members[i] == _Signer) {
                 index = i;
                 done = true;
             }
         }
         require(done, "Signer not fund");
-        require(menbers.length > 1, "Last signer can't be removed !");
-        for (uint256 i = index; i < menbers.length - 1; i++) {
+        require(members.length > 1, "Last signer can't be removed !");
+        for (uint256 i = index; i < members.length - 1; i++) {
             // shifting the element in the array from index to the last
-            menbers[i] = menbers[i + 1];
+            members[i] = members[i + 1];
         }
-        menbers.pop(); //remove the last entry of the array
-        if (signRequired > menbers.length && signRequired > 1) {
+        members.pop(); //remove the last entry of the array
+        if (signRequired > members.length && signRequired > 1) {
             signRequired--;
-        } //should maybe use a require statement to be sure that there will never be more signature needed that menbers ??...
+        } //should maybe use a require statement to be sure that there will never be more signature needed that members ??...
         emit RemovedSignerEvent(_Signer);
     }
 
     function setSignersRequired(uint8 _signRequired) public onlySelf {
-        require(_signRequired <= menbers.length, "Can't have more signers than menbers");
+        require(_signRequired <= members.length, "Can't have more signers than members");
         signRequired = _signRequired;
         emit SigneRequiredEvent(signRequired);
     }
 
     function getSigners() public view returns (address[] memory) {
-        return menbers;
+        return members;
     }
 
-    function getMenberRole(address menber) public view returns (Role) {
-        return menbersRoles[menber];
+    function getMemberRole(address member) public view returns (Role) {
+        return membersRoles[member];
     }
     receive()external payable {}
 
