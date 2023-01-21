@@ -237,8 +237,8 @@ function App(props) {
   const writeContracts = useContractLoader(userSigner, contractConfig, localChainId);
 
   
-  //get menbers of the multisig
-  const menbers = useContractReader(readContracts, "MultiSigCm", "getSigners");
+  //get members of the multisig
+  const members = useContractReader(readContracts, "MultiSigCm", "getSigners");
   const neededSigns = useContractReader(readContracts, "MultiSigCm", "signRequired");
 
   // EXTERNAL CONTRACT EXAMPLE:
@@ -509,7 +509,7 @@ function App(props) {
               apiBaseUrl={apiBaseUrl}
               writeContracts={writeContracts}
               price={price}
-              menbers={menbers}
+              members={members}
               mainnetProvider = {mainnetProvider}
               neededSigns = {neededSigns}
               // chainId={chainId}
@@ -549,7 +549,7 @@ function App(props) {
               contractConfig = {contractConfig}
               signer = {userSigner}
               writeContracts={writeContracts}
-              menbers={menbers}
+              members={members}
               neededSigns = {neededSigns}
               txHelper = {tx}
             />

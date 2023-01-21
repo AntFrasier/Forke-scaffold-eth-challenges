@@ -4,7 +4,7 @@ import { useState } from 'react';
 import proposeTx from '../helpers/propseTx';
 import { useHistory } from 'react-router-dom';
 
-const AddSignatures = ({neededSigns, menbers, apiBaseUrl,multiSigAdd}) => {
+const AddSignatures = ({neededSigns, members, apiBaseUrl,multiSigAdd}) => {
     const [signsNeeded, setSignsNeeded] = useState(neededSigns);
     const [loading, setLoading] = useState(false);
     const history = useHistory();
@@ -18,7 +18,7 @@ const AddSignatures = ({neededSigns, menbers, apiBaseUrl,multiSigAdd}) => {
         }
     }
 
-    console.log(menbers?.length)
+    console.log(members?.length)
   return (
     <div>
         <Form title='Add a Signatures' style={{ width: "350px" , display: "flex", flexDirection:"column"}}> update the signs required
@@ -29,7 +29,7 @@ const AddSignatures = ({neededSigns, menbers, apiBaseUrl,multiSigAdd}) => {
             onChange = {setSignsNeeded}
         />
         <Button
-            disabled={((0 < signsNeeded)&&(signsNeeded<= menbers?.length)) ? false : true}
+            disabled={((0 < signsNeeded)&&(signsNeeded<= members?.length)) ? false : true}
             loading={loading}
         
             onClick={ () => handleClick()}

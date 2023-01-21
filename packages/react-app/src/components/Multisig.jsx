@@ -10,7 +10,7 @@ import SendEth from "./SendEth";
 import AddCustomCall from "./AddCustomCall";
 import { useHistory } from "react-router-dom";
 
-const Multisig = ({ provider, contractConfig, chainId, apiBaseUrl, price, menbers, mainnetProvider, neededSigns }) => {
+const Multisig = ({ provider, contractConfig, chainId, apiBaseUrl, price, members, mainnetProvider, neededSigns }) => {
 
   const contracts = useContractLoader(provider, contractConfig, chainId);
   const MultiSigCm = contracts ? contracts["MultiSigCm"] : "";
@@ -19,26 +19,26 @@ const Multisig = ({ provider, contractConfig, chainId, apiBaseUrl, price, menber
  // const enumRole = ["null", "admin", "user", "dude"]; //todo add roles to the multisig
 
   async function getRole (add) {
-    let role =  0;//await MultiSigCm.getMenberRole(add); // todo add roles working...
+    let role = await MultiSigCm.getMemberRole(add); // todo add roles working...
     console.log ("role ds function", role)
     return role;
   }
 
-  const displayMenbers = menbers
-    ? menbers.map( (menber, index) => {
-       let role = getRole(menber); //wird error with roles ... todo add a correct role management
+  const displayMembers = members
+    ? members.map( (member, index) => {
+       let role = getRole(member); //wird error with roles ... todo add a correct role management
         return (
           <Row key={index} style={{ display: "flex", justifyContent: "center" }}>
             <Col>
               {" "}
-              <Address address={menber} /> {" "} 
+              <Address address={member} /> {" "} 
             </Col>
             <Col>
               {" "}
               <Button   
-                disabled = {menbers.length > 1 ? false : true} 
+                disabled = {members.length > 1 ? false : true} 
                 onClick = { () => {
-                  proposeTx(apiBaseUrl, "removeSigner(address)", [["address"] , [menber]], multiSigAdd, 0, neededSigns)
+                  proposeTx(apiBaseUrl, "removeSigner(address)", [["address"] , [member]], multiSigAdd, 0, neededSigns)
                   history.pushState("/transactions");
                 }}
               >remove</Button>
@@ -59,16 +59,16 @@ const Multisig = ({ provider, contractConfig, chainId, apiBaseUrl, price, menber
         </Row>
         <Divider />
         <Row title="Signers" style={{ display: "flex", justifyContent: "center" }}>
-          <Col title="Menbers">Menbers</Col>
+          <Col title="Members">Members</Col>
         </Row>
-        {displayMenbers}
+        {displayMembers}
         <Row style={{ flexDirection: "row-reverse" }}>
           <b>&nbsp;{neededSigns}</b> Signature(s) required :{" "}
         </Row>
         <Divider />
-        <Row title="Add a menber" style={{ display: "flex", justifyContent: "center" }}>
+        <Row title="Add a member" style={{ display: "flex", justifyContent: "center" }}>
         <AddSigner 
-          menbers = {menbers} 
+          members = {members} 
           multiSigAdd = {multiSigAdd}
           mainnetProvider={mainnetProvider}
           apiBaseUrl = {apiBaseUrl}
@@ -78,7 +78,7 @@ const Multisig = ({ provider, contractConfig, chainId, apiBaseUrl, price, menber
         <Divider />
         <Row title="Add Sigantures" style={{ display: "flex", justifyContent: "center" }}>
         <AddSignatures
-          menbers = {menbers} 
+          members = {members} 
           multiSigAdd = {multiSigAdd}
           mainnetProvider={mainnetProvider}
           apiBaseUrl = {apiBaseUrl}
@@ -88,7 +88,7 @@ const Multisig = ({ provider, contractConfig, chainId, apiBaseUrl, price, menber
         <Divider />
         <Row title="Send Eth" style={{ display: "flex", justifyContent: "center" }}>
         <SendEth
-          menbers = {menbers} 
+          members = {members} 
           multiSigAdd = {multiSigAdd}
           mainnetProvider={mainnetProvider}
           apiBaseUrl = {apiBaseUrl}
@@ -99,7 +99,7 @@ const Multisig = ({ provider, contractConfig, chainId, apiBaseUrl, price, menber
           <Divider />
           <Row title="Send Eth" style={{ display: "flex", justifyContent: "center" }}>
           <AddCustomCall
-          menbers = {menbers} 
+          members = {members} 
           multiSigAdd = {multiSigAdd}
           mainnetProvider={mainnetProvider}
           apiBaseUrl = {apiBaseUrl}
