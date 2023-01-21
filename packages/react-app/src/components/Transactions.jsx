@@ -10,12 +10,12 @@ import Address from './Address';
 import Events from './Events';
 import { DeleteOutlined } from '@ant-design/icons';
 
-function Transactions({ apiBaseUrl, provider, mainnetProvider,contractConfig, chainId, neededSigns, signer, menbers, txHelper, readContracts}) {
+function Transactions({ apiBaseUrl, provider, mainnetProvider,contractConfig, chainId, neededSigns, signer, members, txHelper, readContracts}) {
 
     
     const contracts = useContractLoader(signer, contractConfig, chainId);
     const MultiSigCm = contracts ? contracts["MultiSigCm"] : "";
-    const enumRole = ["null", "admin", "user", "dude"]; //just to remenber
+    const enumRole = ["null", "admin", "user", "dude"]; //just to remember
     const [loading, setLoading] = useState(false);
     const [txPending, setTxPending] = useState([])
 
@@ -49,7 +49,7 @@ function Transactions({ apiBaseUrl, provider, mainnetProvider,contractConfig, ch
     async function sign(tx) {
         setLoading(true)
         try {
-            if (!menbers.includes(signer.address)) throw ("You're not a menber !")
+            if (!members.includes(signer.address)) throw ("You're not a member !")
             let hash = await MultiSigCm.getHash(tx.callData, tx.to, tx.value, tx.neededSigns, tx.txId);
             const signature = await signer.signMessage(ethers.utils.arrayify(hash));
             await pushToDataBase(tx.txId, signature);
@@ -64,7 +64,7 @@ function Transactions({ apiBaseUrl, provider, mainnetProvider,contractConfig, ch
       async function send (tx) {
         try {
             setLoading(true)
-            if (!menbers.includes(signer.address)) throw ("You're not a menber !")
+            if (!members.includes(signer.address)) throw ("You're not a member !")
             const sendTx =  
                 await txHelper(
                     MultiSigCm.execute( tx.callData,tx.to, tx.value, tx.neededSigns, tx.txId, tx.signatures), 
