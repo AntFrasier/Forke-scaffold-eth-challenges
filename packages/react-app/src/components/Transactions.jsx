@@ -10,17 +10,17 @@ import Address from './Address';
 import Events from './Events';
 import { DeleteOutlined } from '@ant-design/icons';
 
-function Transactions({ apiBaseUrl, provider, mainnetProvider,contractConfig, chainId, neededSigns, signer, members, txHelper, readContracts}) {
+function Transactions({ memberRole, address, apiBaseUrl, localProvider, mainnetProvider, writeContracts, neededSigns, signer, members, txHelper, readContracts }) {
 
-    
-    const contracts = useContractLoader(signer, contractConfig, chainId);
-    const MultiSigCm = contracts ? contracts["MultiSigCm"] : "";
+
+    // const contracts = useContractLoader(signer, contractConfig, chainId);
+    const MultiSigCm = writeContracts ? writeContracts["MultiSigCm"] : "";
     const enumRole = ["null", "admin", "user", "dude"]; //just to remember
     const [loading, setLoading] = useState(false);
     const [txPending, setTxPending] = useState([])
 
     // const executeTx = useContractLoader(writeContracts, "MultiSigCm", "execute") 
- 
+
     async function getPendingTransactions() {
         await axios
             .get(apiBaseUrl + "transactions")
@@ -32,119 +32,122 @@ function Transactions({ apiBaseUrl, provider, mainnetProvider,contractConfig, ch
             });
     }
 
-    async function pushToDataBase (txId, sign) {
-     
-        await axios.get(apiBaseUrl + `singleTransaction/${txId}` )
-        .then ( async (res) => {
-            await axios.post(apiBaseUrl + `updateSingleTransaction/${txId}`, {sign}) 
-            getPendingTransactions();
-            return true;
-        })
-        .catch (err => {
-            console.log("erreur while pushing sign to database : ",err)
-            return false;
-        });  
+    async function pushToDataBase(txId, sign) {
+
+        await axios.get(apiBaseUrl + `singleTransaction/${txId}`)
+            .then(async (res) => {
+                await axios.post(apiBaseUrl + `updateSingleTransaction/${txId}`, { sign })
+                getPendingTransactions();
+                return true;
+            })
+            .catch(err => {
+                console.log("erreur while pushing sign to database : ", err)
+                return false;
+            });
     }
 
     async function sign(tx) {
         setLoading(true)
         try {
-            if (!members.includes(signer.address)) throw ("You're not a member !")
+            console.log("signer address : " , address)
+            console.log("members : " ,members)
+            if (!members.includes(address)) throw ("You're not a member !")
             let hash = await MultiSigCm.getHash(tx.callData, tx.to, tx.value, tx.neededSigns, tx.txId);
+            console.log("hash :",hash)
             const signature = await signer.signMessage(ethers.utils.arrayify(hash));
             await pushToDataBase(tx.txId, signature);
             setLoading(false);
-         } catch (err) {
-            console.log("erreur when signing : " , err);
+        } catch (err) {
+            console.log("erreur when signing : ", err);
             alert(err)
             setLoading(false);
-         }
-      }
+        }
+    }
 
-      async function send (tx) {
+    async function send(tx) {
         try {
             setLoading(true)
-            if (!members.includes(signer.address)) throw ("You're not a member !")
-            const sendTx =  
+            if (!members.includes(address)) throw ("You're not a member !")
+            const sendTx =
                 await txHelper(
-                    MultiSigCm.execute( tx.callData,tx.to, tx.value, tx.neededSigns, tx.txId, tx.signatures), 
+                    MultiSigCm.execute(tx.callData, tx.to, tx.value, tx.neededSigns, tx.txId, tx.signatures),
                     async (update) => {
                         if (update && (update.status === "confirmed" || update.status === 1)) {
-                            await axios.get(apiBaseUrl+`deleteTx/${tx.txId}`);
+                            await axios.get(apiBaseUrl + `deleteTx/${tx.txId}`);
                         }
                     }
                 );
         } catch (err) {
-            console.log("erreur while sending execute functin to BC" , err)
+            console.log("erreur while sending execute functin to BC", err)
             alert(err)
-            
+
         } finally {
             setLoading(false)
             getPendingTransactions();
         }
 
-      }
+    }
 
-
-   
     useEffect(() => {
         getPendingTransactions();
-        const intervale = setInterval ( () => {
+        const intervale = setInterval(() => {
             getPendingTransactions();
         }, 10000) // 10s 
         return () => clearInterval(intervale)
     }, [])
-  
-    return (
-        <div className='Transactions' style={{display:"flex",  display: "flex", justifyContent: "center", alignItems:"center", flexDirection: "column" }}>
-            <Card title="Pending transactions" style={{display : "flex", flexDirection: "column", fontSize:"1rem",width: "500px", maxWidth : '100%'}}>
-                {txPending ? txPending.map(
-                    (tx, index) => 
-                    <Row key={index} style={{display : "flex", Border: "solid 1px black",flexDirection: "row", alignItems:'center', justifyContent:'space-evenly'}}>
-                         #{tx.txId} 
-                         <Address address={tx.to} /> 
-                         <div style={{display:"flex", flexDirection:"column", fontSize:"0.75rem"}}>
-                            <div>{(tx.functionName === "") ? "Transfert" : tx.functionName.substring(0,tx.functionName.indexOf("("))}</div>
-                            <div>{(tx.params[1] == "") ? (
-                                "Ξ" + ethers.utils.formatEther(tx.value).substring(0,12) 
-                                ) : ( 
-                                (tx.params[1].length < 12) ? (""+tx.params[1]).substring(0,12) + "..." :  tx.params[1]
-                                )
-                            }
-                            </div>
-                        </div> 
-                        {tx.signatures?.length} 
-                        / 
-                        {neededSigns}
-                        <div style={{display:"flex", flexDirection:"column", fontSize:"0.75rem"}}>
-                            <Button
-                                loading={loading}
-                                onClick={ () => sign(tx)}> 
-                            Sign
-                            </Button>
-                            <Button
-                                type="primary"
-                                disabled={(tx.signatures?.length < neededSigns)}
-                                style={{marginTop:"5px"}}
-                                loading={loading}
-                                onClick={ () => send(tx)}>
-                               
-                            send
-                            </Button>
-                        </div>
-                        <Button 
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={ async () => {
-                                setLoading(true);
-                                await axios.get(apiBaseUrl+`deleteTx/${tx.txId}`);
-                                getPendingTransactions();
-                                setLoading(false);
-                                }}>
-                        </Button>
 
-                    <Divider/>
-                    </Row> ) : null}                  
+    return (
+        <div className='Transactions' style={{ display: "flex", display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column" }}>
+            <Card title="Pending transactions" style={{ display: "flex", flexDirection: "column", fontSize: "1rem", width: "500px", maxWidth: '100%' }}>
+                {txPending ? txPending.map(
+                    (tx, index) =>
+                        <Row key={index +""+tx.txId} style={{ display: "flex", Border: "solid 1px black", flexDirection: "row", alignItems: 'center', justifyContent: 'space-evenly' }}>
+                            #{tx.txId}
+                            <Address address={tx.to} />
+                            <div style={{ display: "flex", flexDirection: "column", fontSize: "0.75rem" }}>
+                                <div>{(tx.functionName === "") ? "Transfert" : tx.functionName.substring(0, tx.functionName.indexOf("("))}</div>
+                                <div>{(tx.params[1] == "") ? (
+                                    "Ξ" + ethers.utils.formatEther(tx.value).substring(0, 12)
+                                ) : (
+                                    (tx.params[1].length < 12) ? ("" + tx.params[1]).substring(0, 12) + "..." : tx.params[1]
+                                )
+                                }
+                                </div>
+                            </div>
+                            {tx.signatures?.length}
+                            /
+                            {neededSigns}
+                            <div style={{ display: "flex", flexDirection: "column", fontSize: "0.75rem" }}>
+                                <Button
+                                    loading={loading}
+                                    onClick={() => sign(tx)}>
+                                    Sign
+                                </Button>
+                                <Button
+                                    type="primary"
+                                    disabled={( memberRole != 4 && (tx.signatures?.length < neededSigns) )}
+                                    style={{ marginTop: "5px" }}
+                                    loading={loading}
+                                    onClick={() => send(tx)}>
+
+                                    send
+                                </Button>
+                            </div>
+                            <Button 
+                                danger
+                                disabled={(memberRole != 1) && (memberRole != 4)}
+                                icon={<DeleteOutlined />}
+                                onClick={async () => {
+                                    setLoading(true);
+                                    await axios.get(apiBaseUrl + `deleteTx/${tx.txId}`);
+                                    getPendingTransactions();
+                                    setLoading(false);
+                                }}
+                                >
+                            </Button>
+
+                            <Divider />
+                        </Row>) : null}
             </Card>
 
             <List title="Transactions done">
@@ -153,7 +156,7 @@ function Transactions({ apiBaseUrl, provider, mainnetProvider,contractConfig, ch
                     contracts={readContracts}
                     contractName="MultiSigCm"
                     eventName="TxSent"
-                    localProvider={provider}
+                    localProvider={localProvider}
                     mainnetProvider={mainnetProvider}
                     startBlock={1}
                 />

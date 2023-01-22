@@ -206,6 +206,8 @@ function App(props) {
     getAddress();
   }, [userSigner]);
 
+ 
+
 
   // You can warn the user if you would like them to be on a specific network
   const localChainId = localProvider && localProvider._network && localProvider._network.chainId;
@@ -238,14 +240,38 @@ function App(props) {
 
   
   //get members of the multisig
-
- 
-  
-  // const members = useContractReader(readContracts, "MultiSigCm", "getSigners");
   const [members, setMembers] = useState([]);
   const neededSigns = useContractReader(readContracts, "MultiSigCm", "signRequired");
+  const MultiSigCm = readContracts ? readContracts["MultiSigCm"] : "";
+  const [roles, setRoles] = useState([]);
+  const [memberRole,setMemberRole] = useState(3);
 
- 
+  async function getRole (_members) { //used a for instead a foreach or map cause i had issue with its
+    let oldRoles = [];
+    for (let i = 0 ; i<_members.length; i++) { //this is a bit wird need to refactore that part but this is the only way i found to did it :p
+      let newRoles = [...oldRoles];
+      let role = await MultiSigCm.getMemberRole(_members[i]);
+      newRoles.push(role);
+      oldRoles = [...newRoles];
+      setRoles(newRoles)
+   }
+  }
+   async function getMembers (){
+    let newMembers = await MultiSigCm.getSigners();
+    setMembers(newMembers)
+    getRole(newMembers);
+   }
+
+  useEffect( () => {
+   if (MultiSigCm && userSigner)  getMembers();
+  }, [MultiSigCm, userSigner]);
+
+  useEffect ( async () => {
+    if (userSigner && MultiSigCm) {
+       let newMemberRole = await MultiSigCm.getMemberRole(address);
+       setMemberRole(newMemberRole);
+    }
+   }, [userSigner, MultiSigCm ])
 
 
  
@@ -515,6 +541,9 @@ function App(props) {
               mainnetProvider = {mainnetProvider}
               neededSigns = {neededSigns}
               blockExplorer = {blockExplorer}
+              roles={roles}
+              multiSigAdd={MultiSigCm?.address}
+              memberRole={memberRole}
               // chainId={chainId}
             />
             <Button style={{ position: "fixed", left: "26px", top: 130 }} type="primary" onClick={showDrawer}>
@@ -547,7 +576,7 @@ function App(props) {
             <Transactions 
               apiBaseUrl={apiBaseUrl}
               readContracts={readContracts}
-              provider = {localProvider}
+              localProvider = {localProvider}
               mainnetProvider={mainnetProvider}
               contractConfig = {contractConfig}
               signer = {userSigner}
@@ -555,6 +584,8 @@ function App(props) {
               members={members}
               neededSigns = {neededSigns}
               txHelper = {tx}
+              address = {address}
+              memberRole={memberRole}
             />
           </Route>
           <Route path="/subgraph">

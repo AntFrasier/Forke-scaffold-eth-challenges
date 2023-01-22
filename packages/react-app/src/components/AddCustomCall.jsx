@@ -113,11 +113,34 @@ const AddCustomCall = ({apiBaseUrl, neededSigns,mainnetProvider, price}) => {
                     </Row>
                     );
                 break;
-            case "string" || "uint64" || "uint" || "uint8" || "uint32" || "int" || "int8" || "int32" || "int64" || "int256":
+            case "string" :
                 toDisplay = (
                     <Row key={index}> 
                         <Input 
                             placeholder='string' 
+                            onChange={  (e) => {
+                                let oldParam = [...params];
+                                oldParam[1][index] = e.target.value;
+                                setParams(oldParam);
+                                }}
+                        />
+                    </Row>
+                    );
+            break;
+            case "uint64" :
+            case "uint" :
+            case "uint8" :
+            case "uint32" :
+            case "int" :
+            case "int8" :
+            case "int32":
+            case "int64" :
+            case "int256" :
+            
+                toDisplay = (
+                    <Row key={index}> 
+                        <Input 
+                            placeholder='Number' 
                             onChange={  (e) => {
                                 let oldParam = [...params];
                                 oldParam[1][index] = e.target.value;
