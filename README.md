@@ -2,7 +2,7 @@
 
 #TODO : 
 - when role is changed the front as to refresh
-- there is a bug in propose changeRole via memebers.jsx
+
 
 
 
