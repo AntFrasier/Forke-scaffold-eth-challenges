@@ -18,7 +18,6 @@ const AddSignatures = ({neededSigns, members, apiBaseUrl,multiSigAdd}) => {
         }
     }
 
-    console.log(members?.length)
   return (
     <div>
         <Form title='Add a Signatures' style={{ width: "350px" , display: "flex", flexDirection:"column"}}> update the signs required

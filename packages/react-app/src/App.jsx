@@ -238,8 +238,17 @@ function App(props) {
 
   
   //get members of the multisig
-  const members = useContractReader(readContracts, "MultiSigCm", "getSigners");
+
+ 
+  
+  // const members = useContractReader(readContracts, "MultiSigCm", "getSigners");
+  const [members, setMembers] = useState([]);
   const neededSigns = useContractReader(readContracts, "MultiSigCm", "signRequired");
+
+ 
+
+
+ 
 
   // EXTERNAL CONTRACT EXAMPLE:
   //
@@ -255,14 +264,6 @@ function App(props) {
   const myMainnetDAIBalance = useContractReader(mainnetContracts, "DAI", "balanceOf", [
     "0x34aA3F359A9D614239015126635CE7732c18fDF3",
   ]);
-
-  // keep track of a variable from the contract in the local React state:
-  const purpose = useContractReader(readContracts, "YourContract", "purpose");
-
-  /*
-  const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
-  console.log("🏷 Resolved austingriffith.eth as:",addressFromENS)
-  */
 
   //
   // 🧫 DEBUG 👨🏻‍🔬
@@ -510,8 +511,10 @@ function App(props) {
               writeContracts={writeContracts}
               price={price}
               members={members}
+              setMembers = {setMembers}
               mainnetProvider = {mainnetProvider}
               neededSigns = {neededSigns}
+              blockExplorer = {blockExplorer}
               // chainId={chainId}
             />
             <Button style={{ position: "fixed", left: "26px", top: 130 }} type="primary" onClick={showDrawer}>

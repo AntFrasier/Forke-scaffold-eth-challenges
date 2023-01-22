@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Card, Col, Divider, Row } from "antd";
+import {  Card, Divider, Row } from "antd";
 import { useContractLoader } from "eth-hooks";
 import Address from "./Address";
 import Balance from "./Balance";
@@ -8,45 +8,36 @@ import proposeTx from "../helpers/propseTx";
 import AddSignatures from "./AddSignatures"
 import SendEth from "./SendEth";
 import AddCustomCall from "./AddCustomCall";
-import { useHistory } from "react-router-dom";
+import { useState } from "react";
+import { useEffect } from "react";
+import Members from "./Members";
 
-const Multisig = ({ provider, contractConfig, chainId, apiBaseUrl, price, members, mainnetProvider, neededSigns }) => {
+const Multisig =  ({ provider,contractConfig, chainId, apiBaseUrl, price, mainnetProvider, neededSigns, blockExplorer, members, setMembers}) => {
 
   const contracts = useContractLoader(provider, contractConfig, chainId);
   const MultiSigCm = contracts ? contracts["MultiSigCm"] : "";
   const multiSigAdd = MultiSigCm ? MultiSigCm.address : "";
-  const history = useHistory();
- // const enumRole = ["null", "admin", "user", "dude"]; //todo add roles to the multisig
+  const [roles, setRoles] = useState([]);
 
-  async function getRole (add) {
-    let role = await MultiSigCm.getMemberRole(add); // todo add roles working...
-    console.log ("role ds function", role)
-    return role;
+  async function getRole (_members) { //used a for instead a foreach or map cause i had issue with its
+    let oldRoles = [];
+    for (let i = 0 ; i<_members.length; i++) { //this is a bit wird need to refactore that part but this is the only way i found to did it :p
+      let newRoles = [...oldRoles];
+      let role = await MultiSigCm.getMemberRole(_members[i]);
+      newRoles.push(role);
+      oldRoles = [...newRoles];
+      setRoles(newRoles)
+   }
   }
+   async function getMembers (){
+    let newMembers = await MultiSigCm.getSigners();
+    setMembers(newMembers)
+    getRole(newMembers);
+   }
 
-  const displayMembers = members
-    ? members.map( (member, index) => {
-       let role = getRole(member); //wird error with roles ... todo add a correct role management
-        return (
-          <Row key={index} style={{ display: "flex", justifyContent: "center" }}>
-            <Col>
-              {" "}
-              <Address address={member} /> {" "} 
-            </Col>
-            <Col>
-              {" "}
-              <Button   
-                disabled = {members.length > 1 ? false : true} 
-                onClick = { () => {
-                  proposeTx(apiBaseUrl, "removeSigner(address)", [["address"] , [member]], multiSigAdd, 0, neededSigns)
-                  history.pushState("/transactions");
-                }}
-              >remove</Button>
-            </Col>
-          </Row>
-        );
-      })
-    : null;
+  useEffect( () => {
+   if (MultiSigCm)  getMembers();
+  }, [MultiSigCm]);
 
   return (
     <div style={{ display: "flex", justifyContent: "center", marginTop: "15px" }}>
@@ -59,11 +50,14 @@ const Multisig = ({ provider, contractConfig, chainId, apiBaseUrl, price, member
         </Row>
         <Divider />
         <Row title="Signers" style={{ display: "flex", justifyContent: "center" }}>
-          <Col title="Members">Members</Col>
-        </Row>
-        {displayMembers}
-        <Row style={{ flexDirection: "row-reverse" }}>
-          <b>&nbsp;{neededSigns}</b> Signature(s) required :{" "}
+          <Members
+            members={members}
+            roles={roles}
+            multiSigAdd={multiSigAdd}
+            neededSigns={neededSigns}
+            mainnetProvider={mainnetProvider}
+            apiBaseUrl={apiBaseUrl}
+            />
         </Row>
         <Divider />
         <Row title="Add a member" style={{ display: "flex", justifyContent: "center" }}>
@@ -73,6 +67,7 @@ const Multisig = ({ provider, contractConfig, chainId, apiBaseUrl, price, member
           mainnetProvider={mainnetProvider}
           apiBaseUrl = {apiBaseUrl}
           neededSigns = {neededSigns}
+          blockExplorer = {blockExplorer}
           />
         </Row>
         <Divider />
