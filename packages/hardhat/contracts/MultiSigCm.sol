@@ -2,11 +2,9 @@
 //Cyril Maranber 11 2022 Scaffold eth multisig challenge
 pragma solidity >=0.8.0 <0.9.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-contract MultiSigCm is Ownable {
+contract MultiSigCm {
     using ECDSA for bytes32;
 
     address public self;
@@ -105,8 +103,13 @@ contract MultiSigCm is Ownable {
         bytes32 msgHash = keccak256(abi.encode(data));
         uint8 validSignature = 0;
         for (uint8 i = 0; i < signatures.length; i++) {
-           
-                validSignature += isValidSignature(msgHash, signatures[i]);
+                if (isValidSignature(msgHash, signatures[i]) == 255) {
+                    validSignature = 255;
+                    break;
+                    }
+                else {
+                    validSignature += isValidSignature(msgHash, signatures[i]);
+                }
                 if (validSignature >= signRequired) {
                     break;
                 } //gas saving

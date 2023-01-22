@@ -30,8 +30,8 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   // });
   
   // Getting a previously deployed contract
-  const MultiSigCm = await ethers.getContract("MultiSigCm", deployer);
-  await MultiSigCm.transferOwnership("0x67dFe20b5F8Bc81C64Ef121bF8e4228FB4CBC60B");
+  // const MultiSigCm = await ethers.getContract("MultiSigCm", deployer);
+  // await MultiSigCm.transferOwnership("0x67dFe20b5F8Bc81C64Ef121bF8e4228FB4CBC60B");
   /*  await YourContract.setPurpose("Hello");
   
     To take ownership of yourContract using the ownable library uncomment next line and add the 
@@ -67,12 +67,13 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
 
   // Verify your contracts with Etherscan
   // You don't want to verify on localhost
-  if (chainId !== localChainId) {
-    await run("verify:verify", {
-      address: YourContract.address,
-      contract: "MultiSigCm/MultiSigCm.sol:MultiSigCm",
-      contractArguments: [],
-    });
-  }
+  // if (chainId !== localChainId) {
+  //   await run("verify:verify", {
+  //     address: YourContract.address,
+  //     contract: "MultiSigCm/MultiSigCm.sol:MultiSigCm",
+  //     contractArguments: [],
+  //   });
+  
+  // }
 };
-module.exports.tags = ["MultiSigCm"];
+module.exports.tags = ["YourContract"];
