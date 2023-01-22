@@ -1,7 +1,10 @@
 # 🏗 scaffold-eth | 🏰 BuidlGuidl
 
 #TODO : 
-fix bug with addressInput customcall data
+- Add role to the front
+    -change someone role (off and onchain)
+    -allow remove tx from certain role only (offcahain only)
+- manage roles in solidity
 
 
 
