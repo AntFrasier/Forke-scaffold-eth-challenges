@@ -60,7 +60,7 @@ const Members = ({apiBaseUrl,members, roles, neededSigns, multiSigAdd, mainnetPr
                         setLoading(true);
                         // let newRole = 
                         console.log(e,role, member)
-                        proposeTx(apiBaseUrl, "changeRole(address, uint8)",[["address", "uint8"],[member, e]], multiSigAdd, 0, neededSigns )
+                        await proposeTx(apiBaseUrl, "changeRole(address, uint8)",[["address", "uint8"],[member, e]], multiSigAdd, 0, neededSigns )
                         setLoading(false);
                        history.push("/transactions")
                     }}
