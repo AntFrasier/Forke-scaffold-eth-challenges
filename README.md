@@ -1,10 +1,8 @@
 # 🏗 scaffold-eth | 🏰 BuidlGuidl
 
 #TODO : 
-- Add role to the front
-    -change someone role (off and onchain)
-    -allow remove tx from certain role only (offcahain only)
-- manage roles in solidity
+- when role is changed the front as to refresh
+- there is a bug in propose changeRole via memebers.jsx
 
 
 
