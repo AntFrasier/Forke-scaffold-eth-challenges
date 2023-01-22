@@ -15,19 +15,19 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
     // args: [ "Hello", ethers.utils.parseEther("1.5") ],
     log: true,
   });
-  await deploy("TestToken", {
-    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
-    from: deployer,
-    // args: [ "Hello", ethers.utils.parseEther("1.5") ],
-    log: true,
-  });
+  // await deploy("TestToken", {
+  //   // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
+  //   from: deployer,
+  //   // args: [ "Hello", ethers.utils.parseEther("1.5") ],
+  //   log: true,
+  // });
 
-  await deploy("Test", {
-    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
-    from: deployer,
-    // args: [ "Hello", ethers.utils.parseEther("1.5") ],
-    log: true,
-  });
+  // await deploy("Test", {
+  //   // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
+  //   from: deployer,
+  //   // args: [ "Hello", ethers.utils.parseEther("1.5") ],
+  //   log: true,
+  // });
   
   // Getting a previously deployed contract
   const MultiSigCm = await ethers.getContract("MultiSigCm", deployer);
@@ -70,9 +70,9 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   if (chainId !== localChainId) {
     await run("verify:verify", {
       address: YourContract.address,
-      contract: "contracts/YourContract.sol:YourContract",
+      contract: "MultiSigCm/MultiSigCm.sol:MultiSigCm",
       contractArguments: [],
     });
   }
 };
-module.exports.tags = ["YourContract"];
+module.exports.tags = ["MultiSigCm"];
