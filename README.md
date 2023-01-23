@@ -18,7 +18,9 @@ I Started from the scaffoldEth master branch, I really wanted to dive into the m
 
  [![image](./images/presentation.JPG)
 
+# Added roles 
 
+I added roles into the multisig, it definitly has to be improved. The GOD role, is just for testing it gives all the right to ... god :p If your are admin you'r allow to propose new role, and allow to remove TX from the dataBase. basacly right now it just 
 
 
 # 💬 Support Chat

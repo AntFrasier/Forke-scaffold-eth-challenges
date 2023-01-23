@@ -281,7 +281,7 @@ function App(props) {
       let newMemberRole = await MultiSigCm.getMemberRole(address);
       setMemberRole(newMemberRole);
     }
-  }, [userSigner, MultiSigCm]);
+  }, [address, MultiSigCm]);
 
   // EXTERNAL CONTRACT EXAMPLE:
   //
@@ -557,6 +557,7 @@ function App(props) {
               roles={roles}
               multiSigAdd={MultiSigCm?.address}
               memberRole={memberRole}
+              address={address}
               // chainId={chainId}
             />
             <Button style={{ position: "fixed", left: "26px", top: 130 }} type="primary" onClick={showDrawer}>

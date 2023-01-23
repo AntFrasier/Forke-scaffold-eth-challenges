@@ -6,6 +6,7 @@ import { DeleteOutlined } from "@ant-design/icons";
 import { useHistory } from "react-router-dom";
 import proposeTx from "../helpers/propseTx";
 import { useState } from "react";
+import { useEffect } from "react";
 
 const Members = ({
   apiBaseUrl,
@@ -25,6 +26,7 @@ const Members = ({
     { label: "God", value: 4 },
   ];
   const [loading, setLoading] = useState(false);
+  const [newMemberRole, setNewMemberRole] = useState();
   const history = useHistory();
   var displayMembers;
 
@@ -51,9 +53,7 @@ const Members = ({
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div> role : </div>
             <div>
-              {memberRole != 1 && memberRole != 4 ? (
-                <b>{enumRole[role]}</b>
-              ) : (
+              {memberRole == 1 || memberRole == 4 ? (
                 <Select
                   style={{ width: "100%" }}
                   defaultValue={"role"}
@@ -80,7 +80,8 @@ const Members = ({
                     history.push("/transactions");
                   }}
                 />
-              )}
+              ) : (
+                <b>{enumRole[role]}</b>)}
             </div>
           </div>
         </div>
@@ -105,6 +106,11 @@ const Members = ({
       </Row>
     );
   }
+  useEffect( () => { //this just to reload when member role change
+    setNewMemberRole(memberRole);
+    console.log("memberRole in the use effect", memberRole);
+  }, [memberRole]);
+
   return (
     <div title="Members">
       Members
