@@ -19,7 +19,19 @@ import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import WalletLink from "walletlink";
 import Web3Modal from "web3modal";
 import "./App.css";
-import { Account, Contract, Faucet, GasGauge, Header, Ramp, ThemeSwitch, Address, Multisig, ManageSigners, Transactions } from "./components";
+import {
+  Account,
+  Contract,
+  Faucet,
+  GasGauge,
+  Header,
+  Ramp,
+  ThemeSwitch,
+  Address,
+  Multisig,
+  ManageSigners,
+  Transactions,
+} from "./components";
 import { INFURA_ID, NETWORK, NETWORKS, ALCHEMY_KEY } from "./constants";
 import externalContracts from "./contracts/external_contracts";
 // contracts
@@ -69,8 +81,8 @@ const scaffoldEthProvider = navigator.onLine
   : null;
 const poktMainnetProvider = navigator.onLine
   ? new ethers.providers.StaticJsonRpcProvider(
-    "https://eth-mainnet.gateway.pokt.network/v1/lb/61853c567335c80036054a2b",
-  )
+      "https://eth-mainnet.gateway.pokt.network/v1/lb/61853c567335c80036054a2b",
+    )
   : null;
 const mainnetInfura = navigator.onLine
   ? new ethers.providers.StaticJsonRpcProvider(`https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_KEY}`)
@@ -165,13 +177,12 @@ const web3Modal = new Web3Modal({
 });
 
 function App(props) {
-
   const mainnetProvider =
     poktMainnetProvider && poktMainnetProvider._isProvider
       ? poktMainnetProvider
       : scaffoldEthProvider && scaffoldEthProvider._network
-        ? scaffoldEthProvider
-        : mainnetInfura;
+      ? scaffoldEthProvider
+      : mainnetInfura;
 
   const [injectedProvider, setInjectedProvider] = useState();
   const [address, setAddress] = useState();
@@ -187,7 +198,7 @@ function App(props) {
   };
   // // base URL for The backend:
   // const apiBaseUrl= "http://localhost:33550/api/"
-  const apiBaseUrl= "https://multisigcm.onrender.com/api/"
+  const apiBaseUrl = "https://multisigcm.onrender.com/api/";
   /* 💵 This hook will get the price of ETH from 🦄 Uniswap: */
   const price = useExchangeEthPrice(targetNetwork, mainnetProvider);
 
@@ -206,9 +217,6 @@ function App(props) {
     }
     getAddress();
   }, [userSigner]);
-
- 
-
 
   // You can warn the user if you would like them to be on a specific network
   const localChainId = localProvider && localProvider._network && localProvider._network.chainId;
@@ -239,43 +247,41 @@ function App(props) {
   // If you want to make 🔐 write transactions to your contracts, use the userSigner:
   const writeContracts = useContractLoader(userSigner, contractConfig, localChainId);
 
-  
   //get members of the multisig
   const [members, setMembers] = useState([]);
   const neededSigns = useContractReader(readContracts, "MultiSigCm", "signRequired");
   const MultiSigCm = readContracts ? readContracts["MultiSigCm"] : "";
   const [roles, setRoles] = useState([]);
-  const [memberRole,setMemberRole] = useState(3);
+  const [memberRole, setMemberRole] = useState(3);
 
-  async function getRole (_members) { //used a for instead a foreach or map cause i had issue with its
+  async function getRole(_members) {
+    //used a for instead a foreach or map cause i had issue with its
     let oldRoles = [];
-    for (let i = 0 ; i<_members.length; i++) { //this is a bit wird need to refactore that part but this is the only way i found to did it :p
+    for (let i = 0; i < _members.length; i++) {
+      //this is a bit wird need to refactore that part but this is the only way i found to did it :p
       let newRoles = [...oldRoles];
       let role = await MultiSigCm.getMemberRole(_members[i]);
       newRoles.push(role);
       oldRoles = [...newRoles];
-      setRoles(newRoles)
-   }
+      setRoles(newRoles);
+    }
   }
-   async function getMembers (){
+  async function getMembers() {
     let newMembers = await MultiSigCm.getSigners();
-    setMembers(newMembers)
+    setMembers(newMembers);
     getRole(newMembers);
-   }
+  }
 
-  useEffect( () => {
-   if (MultiSigCm && userSigner)  getMembers();
+  useEffect(() => {
+    if (MultiSigCm && userSigner) getMembers();
   }, [MultiSigCm, userSigner]);
 
-  useEffect ( async () => {
+  useEffect(async () => {
     if (userSigner && MultiSigCm) {
-       let newMemberRole = await MultiSigCm.getMemberRole(address);
-       setMemberRole(newMemberRole);
+      let newMemberRole = await MultiSigCm.getMemberRole(address);
+      setMemberRole(newMemberRole);
     }
-   }, [userSigner, MultiSigCm ])
-
-
- 
+  }, [userSigner, MultiSigCm]);
 
   // EXTERNAL CONTRACT EXAMPLE:
   //
@@ -477,14 +483,20 @@ function App(props) {
     );
   }
 
-  //adding slide out debug states 
-  const [debugContractToShow, setDebugContractToShow] = useState('');
+  //adding slide out debug states
+  const [debugContractToShow, setDebugContractToShow] = useState("");
 
-  const contractsToShow = Object.keys(readContracts).map((_contractName) => {
-    if (!debugContractToShow) setDebugContractToShow(_contractName) //if there as been no click show the last contract that've been deployed
+  const contractsToShow = Object.keys(readContracts).map(_contractName => {
+    if (!debugContractToShow) setDebugContractToShow(_contractName); //if there as been no click show the last contract that've been deployed
     return (
       <Menu.Item key={`${_contractName}`}>
-        <Link onClick={() => { setDebugContractToShow(_contractName) }}>{_contractName}</Link>
+        <Link
+          onClick={() => {
+            setDebugContractToShow(_contractName);
+          }}
+        >
+          {_contractName}
+        </Link>
       </Menu.Item>
     );
   });
@@ -529,19 +541,19 @@ function App(props) {
 
         <Switch>
           <Route exact path="/">
-            <Multisig 
+            <Multisig
               readContracts={readContracts}
-              provider = {localProvider}
-              contractConfig = {contractConfig}
-              signer = {userSigner}
+              provider={localProvider}
+              contractConfig={contractConfig}
+              signer={userSigner}
               apiBaseUrl={apiBaseUrl}
               writeContracts={writeContracts}
               price={price}
               members={members}
-              setMembers = {setMembers}
-              mainnetProvider = {mainnetProvider}
-              neededSigns = {neededSigns}
-              blockExplorer = {blockExplorer}
+              setMembers={setMembers}
+              mainnetProvider={mainnetProvider}
+              neededSigns={neededSigns}
+              blockExplorer={blockExplorer}
               roles={roles}
               multiSigAdd={MultiSigCm?.address}
               memberRole={memberRole}
@@ -557,35 +569,36 @@ function App(props) {
               closable={true}
               onClose={onClose}
               visible={visible}
-              key="right">
-                <Address value={address} />
-                <Menu selectedKeys={debugContractToShow} mode="horizontal">
-                  {contractsToShow}
-                </Menu>
-                <Contract
-                  name={debugContractToShow}
-                  price={price}
-                  signer={userSigner}
-                  provider={localProvider}
-                  address={address}
-                  blockExplorer={blockExplorer}
-                  contractConfig={contractConfig}
-                />
+              key="right"
+            >
+              <Address value={address} />
+              <Menu selectedKeys={debugContractToShow} mode="horizontal">
+                {contractsToShow}
+              </Menu>
+              <Contract
+                name={debugContractToShow}
+                price={price}
+                signer={userSigner}
+                provider={localProvider}
+                address={address}
+                blockExplorer={blockExplorer}
+                contractConfig={contractConfig}
+              />
             </Drawer>
           </Route>
           <Route path="/transactions">
-            <Transactions 
+            <Transactions
               apiBaseUrl={apiBaseUrl}
               readContracts={readContracts}
-              localProvider = {localProvider}
+              localProvider={localProvider}
               mainnetProvider={mainnetProvider}
-              contractConfig = {contractConfig}
-              signer = {userSigner}
+              contractConfig={contractConfig}
+              signer={userSigner}
               writeContracts={writeContracts}
               members={members}
-              neededSigns = {neededSigns}
-              txHelper = {tx}
-              address = {address}
+              neededSigns={neededSigns}
+              txHelper={tx}
+              address={address}
               memberRole={memberRole}
             />
           </Route>
@@ -624,7 +637,6 @@ function App(props) {
           <Col span={8}>
             <Ramp price={price} address={address} networks={NETWORKS} />
           </Col>
-
           <Col span={8} style={{ textAlign: "center", opacity: 0.8 }}>
             <GasGauge gasPrice={gasPrice} />
           </Col>
@@ -655,6 +667,26 @@ function App(props) {
               )
             }
           </Col>
+        </Row>
+        <Row>
+          <p>
+            {/* <a href="https://github.com/austintgriffith/scaffold-eth" target="_blank" rel="noopener noreferrer"> */}
+            <a href="https://speedrunethereum.com/" target="_blank" rel="noopener noreferrer">
+              SpeedRunEthereum
+            </a>{" "}
+            |{" "}
+            <a href="https://buidlguidl.com/" target="_blank" rel="noopener noreferrer">
+              BuildGuild
+            </a>{" "}
+            |{" "}
+            <a
+              href="https://github.com/AntFrasier/Forke-scaffold-eth-challenges/tree/multiSigCm"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GitHub repo
+            </a>
+          </p>
         </Row>
       </div>
     </div>
