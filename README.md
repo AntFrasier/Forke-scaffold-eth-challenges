@@ -9,17 +9,29 @@ I really wanted to dive into the multisig :) Please feel free to give any feedBa
 
 # Added roles 
 
-I added roles into the multisig, it definitly has to be improved. The GOD role, is just for testing it gives all the right to ... god :p If your are admin you'r allow to propose new role, and allow to remove TX from the dataBase. basacly right now it just 
-user mode : ![image](./images/userMode.JPG)
-Admin and God mode :![image](./images/adminMode.JPG)
+I added roles into the multisig, it definitly has to be improved. The GOD role, is just for testing it gives all the right to ... god :p If your are admin you'r allow to propose new role, and allow to remove TX from the dataBase.
+
+user mode : 
+
+![image](./images/userMode.JPG)
+
+Admin and God mode :
+
+![image](./images/adminMode.JPG)
 
 The same to remove a tx from the database :
-user mode : ![image](./images/removeUser.JPG)
-Admin and God mode :![image](./images/removeAdmin.JPG)
+
+user mode :
+
+ ![image](./images/removeUser.JPG)
+
+Admin and God mode :
+
+![image](./images/removeAdmin.JPG)
 
 # Added a custom calldata 
 
-I added a custom callData. You juste have to put the contract address that you want to call for exemple goerli testnet token (TST) : 0x7af963cF6D228E564e2A0aA0DdBF06210B38615D
+I added a custom callData. You just have to put the contract address that you want to call for exemple goerli testnet token (TST) : 0x7af963cF6D228E564e2A0aA0DdBF06210B38615D
 
 ![image](./images/custonCallData.JPG)
 
