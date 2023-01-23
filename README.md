@@ -5,7 +5,8 @@
 I really wanted to dive into the multisig :) Please feel free to give any feedBack about the code. [![Twitter URL](https://img.shields.io/twitter/url/https/twitter.com/maranberc.svg?style=social&label=Follow%20MaranberC)](https://twitter.com/MaranberC)
  
 
- ![image](./images/presentation.JPG)
+![presentation](https://user-images.githubusercontent.com/84241354/214037046-ae7714c5-8984-476c-9337-b211e344a0e0.JPG)
+
 
 # Added roles 
 
@@ -13,33 +14,39 @@ I added roles into the multisig, it definitly has to be improved. The GOD role, 
 
 user mode : 
 
-![image](./images/userMode.JPG)
+![userMode](https://user-images.githubusercontent.com/84241354/214037086-e58a1117-2eab-4a46-a2d0-b91bcb22f35f.JPG)
+
 
 Admin and God mode :
 
-![image](./images/adminMode.JPG)
+![adminMode](https://user-images.githubusercontent.com/84241354/214037119-f015b5fe-b8b2-4ade-bd01-2fb3a063e619.JPG)
+
 
 The same to remove a tx from the database :
 
 user mode :
 
- ![image](./images/removeUser.JPG)
+![removeUser](https://user-images.githubusercontent.com/84241354/214037143-22fbecd2-544a-48f0-aba3-54b5db0c6bdb.JPG)
+
 
 Admin and God mode :
 
-![image](./images/removeAdmin.JPG)
+![removeAdmin](https://user-images.githubusercontent.com/84241354/214037158-c103205f-9cb8-4716-a1e3-eae9b2c24d27.JPG)
+
 
 # Added a custom calldata 
 
 I added a custom callData. You just have to put the contract address that you want to call for exemple goerli testnet token (TST) : 0x7af963cF6D228E564e2A0aA0DdBF06210B38615D
 
-![image](./images/custonCallData.JPG)
+![custonCallData](https://user-images.githubusercontent.com/84241354/214037215-127dc212-21a9-48c8-b3ae-20e4113590f4.JPG)
+
 
 
 You can add a mount if needed 💸.
 Then add the function name (⚠️ case sensitive) with args, exemple mint(address,uint256)
 
-![image](./images/custonCallDataMint.JPG)
+![custonCallDataMint](https://user-images.githubusercontent.com/84241354/214037242-3fe8159d-4d39-4d8e-9082-54221dde7613.JPG)
+
 
 Then propose and wait to the tx be signed by the members.
 
