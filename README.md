@@ -16,7 +16,7 @@
 I Started from the scaffoldEth master branch, I really wanted to dive into the multisig :) Please feel free to give any feedBack about the code. [![Twitter URL](https://img.shields.io/twitter/url/https/twitter.com/maranberc.svg?style=social&label=Follow%20MaranberC)](https://twitter.com/MaranberC)
  on Twitter
 
- [image](./images/presentation.JPG)
+ [![image](./images/presentation.JPG)
 
 
 
