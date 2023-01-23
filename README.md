@@ -14,7 +14,7 @@
 
 ## What I Did :
 
-I Started from the scaffoldEth master branch, I really wanted to dive into the multisig :) Please feel free to give any feedBack about the code. [![Twitter URL](https://img.shields.io/twitter/url/https/twitter.com/maranberc.svg?style=social&label=Follow%20%maranberc)](https://twitter.com/maranberc)
+I Started from the scaffoldEth master branch, I really wanted to dive into the multisig :) Please feel free to give any feedBack about the code. [![Twitter URL](https://img.shields.io/twitter/url/https/twitter.com/maranberc.svg?style=social&label=Follow%20MaranberC)](https://twitter.com/MaranberC)
  on Twitter
 
 > ⚙️ build and upload your frontend and share the url with your friends...
