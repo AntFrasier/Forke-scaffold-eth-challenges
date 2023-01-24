@@ -4,7 +4,7 @@ const { exists } = require('fs');
 const fsPromises = require('fs').promises;
 const cors = require('cors');
 const app = express();
-var https = require('https')
+// var https = require('https')
 
 let txId = 0;
 
@@ -118,23 +118,23 @@ app.get('/api/transactions', async (req, res) => {
         })
 });
 
-// const port = (process.env.PORT || 33550)
+const port = (process.env.PORT || 33550)
 
-// app.listen(port, () => {
-//     console.log("Server is runing on port : ", port)
-// })
+app.listen(port, () => {
+    console.log("Server is runing on port : ", port)
+})
 
-if(fs.existsSync('server.key')&&fs.existsSync('server.cert')){
-    console.log("am i here")
-    https.createServer({
-      key: fs.readFileSync('server.key'),
-      cert: fs.readFileSync('server.cert')
-    }, app).listen(49832, () => {
-      console.log('HTTPS Listening: 49832')
-    })
-  }else{
-    console.log("OR  here")
-    var server = app.listen(49832, function () {
-        console.log("HTTP Listening on port:", server.address().port);
-    });
-  }
+// if(fs.existsSync('server.key')&&fs.existsSync('server.cert')){
+//     console.log("am i here")
+//     https.createServer({
+//       key: fs.readFileSync('server.key'),
+//       cert: fs.readFileSync('server.cert')
+//     }, app).listen(49832, () => {
+//       console.log('HTTPS Listening: 49832')
+//     })
+//   }else{
+//     console.log("OR  here")
+//     var server = app.listen(49832, function () {
+//         console.log("HTTP Listening on port:", server.address().port);
+//     });
+//   }
