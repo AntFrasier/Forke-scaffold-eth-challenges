@@ -25,6 +25,7 @@ function Transactions({ memberRole, address, apiBaseUrl, localProvider, mainnetP
         await axios
             .get(apiBaseUrl + "transactions")
             .then(res => {
+                console.log("res.data.content", res.data.content)
                 setTxPending(res.data.content.txs);
             })
             .catch(err => {
