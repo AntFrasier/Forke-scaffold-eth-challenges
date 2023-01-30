@@ -11,6 +11,7 @@ export function getCallData(functionName, params) {
 export default async function proposeTx(apiBaseUrl, _functionName, _params, _to, _value, neededSigns) { 
     let callData = getCallData(_functionName, _params);
     let txId = await axios.get(apiBaseUrl + "txId");
+    console.log("------------What !!!---------", txId)
     try {
         let result = await axios.post( 
             apiBaseUrl + "addTransaction",  
